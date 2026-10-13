@@ -1,0 +1,178 @@
+{
+  "split": {
+    "train": 1939995,
+    "train_fraud": 5781,
+    "valid": 277089,
+    "valid_fraud": 805,
+    "test": 553309,
+    "test_fraud": 1611,
+    "class_weights": {
+      "1": 167.79060716139077,
+      "0": 0.501494405479435
+    }
+  },
+  "results": {
+    "Logistic Regression": {
+      "TP": 1603,
+      "TN": 551694,
+      "FP": 4,
+      "FN": 8,
+      "precision": 0.9975108898568762,
+      "recall": 0.9950341402855369,
+      "f1": 0.9962709757613424,
+      "accuracy": 0.9999783122992758,
+      "specificity": 0.999992749656515,
+      "auc_roc": 0.999140045580268,
+      "auc_pr": 0.9917783123731594,
+      "at_default_0_5": {
+        "TP": 1604,
+        "FP": 160,
+        "FN": 7,
+        "precision": 0.909297052154195,
+        "recall": 0.9956548727498448,
+        "f1": 0.9505185185185185
+      },
+      "threshold": 0.8399884361361599,
+      "train_time_s": 16.7,
+      "predict_time_s": 9.6
+    },
+    "Decision Tree": {
+      "TP": 1605,
+      "TN": 551697,
+      "FP": 1,
+      "FN": 6,
+      "precision": 0.9993773349937733,
+      "recall": 0.9962756052141527,
+      "f1": 0.9978240596829345,
+      "accuracy": 0.9999873488412442,
+      "specificity": 0.9999981874141287,
+      "auc_roc": 0.9973147839843532,
+      "auc_pr": 0.9962862480072979,
+      "at_default_0_5": {
+        "TP": 1605,
+        "FP": 144,
+        "FN": 6,
+        "precision": 0.9176672384219554,
+        "recall": 0.9962756052141527,
+        "f1": 0.9553571428571428
+      },
+      "threshold": 1.0,
+      "train_time_s": 9.3,
+      "predict_time_s": 3.6
+    },
+    "Random Forest": {
+      "TP": 1603,
+      "TN": 551698,
+      "FP": 0,
+      "FN": 8,
+      "precision": 1.0,
+      "recall": 0.9950341402855369,
+      "f1": 0.9975108898568762,
+      "accuracy": 0.9999855415328506,
+      "specificity": 1.0,
+      "auc_roc": 0.999400891426356,
+      "auc_pr": 0.9985434472392183,
+      "at_default_0_5": {
+        "TP": 1606,
+        "FP": 0,
+        "FN": 5,
+        "precision": 1.0,
+        "recall": 0.9968963376784605,
+        "f1": 0.9984457569163817
+      },
+      "threshold": 0.9399983735684876,
+      "train_time_s": 61.0,
+      "predict_time_s": 6.7
+    },
+    "GBT": {
+      "TP": 1604,
+      "TN": 551695,
+      "FP": 3,
+      "FN": 7,
+      "precision": 0.9981331673926571,
+      "recall": 0.9956548727498448,
+      "f1": 0.9968924798011186,
+      "accuracy": 0.9999819269160631,
+      "specificity": 0.9999945622423863,
+      "auc_roc": 0.999960581601672,
+      "auc_pr": 0.9956581244111617,
+      "at_default_0_5": {
+        "TP": 1605,
+        "FP": 109,
+        "FN": 6,
+        "precision": 0.9364060676779463,
+        "recall": 0.9962756052141527,
+        "f1": 0.9654135338345865
+      },
+      "threshold": 0.9784791144416591,
+      "train_time_s": 114.0,
+      "predict_time_s": 5.4
+    }
+  },
+  "rule_baseline": {
+    "TP": 4,
+    "TN": 551698,
+    "FP": 0,
+    "FN": 1607,
+    "precision": 1.0,
+    "recall": 0.002482929857231533,
+    "f1": 0.004953560371517028
+  },
+  "best_model": "Random Forest",
+  "feature_importance_model": "Random Forest",
+  "feature_importance": {
+    "type_CASH_OUT": 0.0016296766542974604,
+    "log_amount": 0.007318113028788392,
+    "log_oldbalanceOrg": 0.1323446511249981,
+    "log_newbalanceOrig": 0.03774514471029207,
+    "log_oldbalanceDest": 0.007198822345881427,
+    "log_newbalanceDest": 0.03467487898693056,
+    "slog_errorBalanceOrig": 0.21588815754822555,
+    "slog_errorBalanceDest": 0.0058013942387607105,
+    "origZeroBalance": 0.011729034383857357,
+    "destZeroBalance": 0.06372616305271082,
+    "origEmptied": 0.4683069366292622,
+    "hour": 0.013637027295995429
+  },
+  "lr_coefficients": {
+    "type_CASH_OUT": -0.139904410465498,
+    "log_amount": 0.5027199570676422,
+    "log_oldbalanceOrg": 0.33276004931951997,
+    "log_newbalanceOrig": -0.6458666944354201,
+    "log_oldbalanceDest": -0.2740579563079352,
+    "log_newbalanceDest": -0.16239403065184135,
+    "slog_errorBalanceOrig": -1.1132165783369272,
+    "slog_errorBalanceDest": 0.3194770107542943,
+    "origZeroBalance": 0.4383230067887934,
+    "destZeroBalance": 0.10378221540860738,
+    "origEmptied": 0.35564764714347585,
+    "hour": -0.17673801458324934
+  },
+  "features": [
+    "type_CASH_OUT",
+    "log_amount",
+    "log_oldbalanceOrg",
+    "log_newbalanceOrig",
+    "log_oldbalanceDest",
+    "log_newbalanceDest",
+    "slog_errorBalanceOrig",
+    "slog_errorBalanceDest",
+    "origZeroBalance",
+    "destZeroBalance",
+    "origEmptied",
+    "hour"
+  ],
+  "figures": [
+    "D:\\code\\bigdata\\fraud_detection_spark_v3\\fraud_detection_spark\\outputs\\figures\\fig_label_distribution.png",
+    "D:\\code\\bigdata\\fraud_detection_spark_v3\\fraud_detection_spark\\outputs\\figures\\fig_type_distribution.png",
+    "D:\\code\\bigdata\\fraud_detection_spark_v3\\fraud_detection_spark\\outputs\\figures\\fig_amount_distribution.png",
+    "D:\\code\\bigdata\\fraud_detection_spark_v3\\fraud_detection_spark\\outputs\\figures\\fig_fraud_by_hour.png",
+    "D:\\code\\bigdata\\fraud_detection_spark_v3\\fraud_detection_spark\\outputs\\figures\\fig_balance_patterns.png",
+    "D:\\code\\bigdata\\fraud_detection_spark_v3\\fraud_detection_spark\\outputs\\figures\\fig_correlation.png",
+    "D:\\code\\bigdata\\fraud_detection_spark_v3\\fraud_detection_spark\\outputs\\figures\\fig_metrics_comparison.png",
+    "D:\\code\\bigdata\\fraud_detection_spark_v3\\fraud_detection_spark\\outputs\\figures\\fig_confusion_matrices.png",
+    "D:\\code\\bigdata\\fraud_detection_spark_v3\\fraud_detection_spark\\outputs\\figures\\fig_roc_curves.png",
+    "D:\\code\\bigdata\\fraud_detection_spark_v3\\fraud_detection_spark\\outputs\\figures\\fig_pr_curves.png",
+    "D:\\code\\bigdata\\fraud_detection_spark_v3\\fraud_detection_spark\\outputs\\figures\\fig_feature_importance.png"
+  ]
+}

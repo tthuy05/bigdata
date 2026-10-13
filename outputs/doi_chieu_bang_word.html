@@ -1,0 +1,158 @@
+<html><head><meta charset='utf-8'><title>Đối chiếu bảng Word</title><style>body{font-family:Segoe UI,Arial,sans-serif;max-width:1100px;margin:24px auto;padding:0 16px;color:#222}
+h1{font-size:22px}h2{font-size:17px;margin:28px 0 6px;border-left:5px solid #4C72B0;padding-left:8px}
+.meta{font-size:13px;margin:2px 0}.meta b{display:inline-block;width:150px}
+code{background:#f1f3f5;padding:1px 4px;border-radius:3px;font-size:12px}
+table{border-collapse:collapse;margin:8px 0;font-size:13px}th,td{border:1px solid #bbb;padding:4px 9px;text-align:right}
+th{background:#D9E2F3}td:first-child,th:first-child{text-align:left}
+.ok{background:#e3f6e5}.miss{background:#fde2e2}.note{font-size:13px;color:#444;margin:4px 0}
+.sum{padding:10px 14px;border-radius:6px;background:#f5f7fa;font-size:14px}.nodata{color:#777;font-size:13px}
+.legend span{padding:2px 8px;margin-right:8px;border:1px solid #bbb}</style></head><body>
+<h1>Đối chiếu số liệu từng bảng trong báo cáo Word</h1>
+<p class='legend'>Chưa chỉ định file Word (--docx) nên không tô màu đối chiếu.</p>
+<div class='sum'>Thêm tham số --docx để tô màu đối chiếu với file Word.</div>
+<h2>Bảng 1. Đối tượng và phạm vi nghiên cứu</h2>
+<p class='meta'><b>Nguồn số liệu:</b> <code>Nội dung mô tả (viết tay)</code></p>
+<p class='meta'><b>Code tính ra:</b> <code>–</code></p>
+<p class='nodata'>Bảng mô tả/lý thuyết – không có số liệu tính toán, không cần đối chiếu.</p>
+<h2>Bảng 2. So sánh đặc điểm các thuật toán sử dụng</h2>
+<p class='meta'><b>Nguồn số liệu:</b> <code>Lý thuyết (viết tay)</code></p>
+<p class='meta'><b>Code tính ra:</b> <code>–</code></p>
+<p class='nodata'>Bảng mô tả/lý thuyết – không có số liệu tính toán, không cần đối chiếu.</p>
+<h2>Bảng 3. Ma trận nhầm lẫn cho bài toán phát hiện gian lận</h2>
+<p class='meta'><b>Nguồn số liệu:</b> <code>Lý thuyết (viết tay)</code></p>
+<p class='meta'><b>Code tính ra:</b> <code>–</code></p>
+<p class='nodata'>Bảng mô tả/lý thuyết – không có số liệu tính toán, không cần đối chiếu.</p>
+<h2>Bảng 4. Môi trường và công cụ thực nghiệm</h2>
+<p class='meta'><b>Nguồn số liệu:</b> <code>outputs/metrics/env.json</code></p>
+<p class='meta'><b>Code tính ra:</b> <code>main.py bước 2 (env.json) + src/envcheck.py (java -version)</code></p>
+<table><tr><th>Thành phần</th><th>Giá trị</th><th>Khóa JSON</th></tr>
+<tr><td class="">Apache Spark (PySpark)</td><td class="">3.5.3</td><td class="">spark_version</td></tr>
+<tr><td class="">Python</td><td class="">3.12.14</td><td class="">python</td></tr>
+<tr><td class="">Java</td><td class="">java version 1.8.0_251</td><td class="">java</td></tr>
+<tr><td class="">Chế độ chạy Spark</td><td class="">local[2], bộ nhớ Driver 1g</td><td class="">master, driver_memory</td></tr>
+<tr><td class="">Số nhân CPU</td><td class="">16</td><td class="">cores</td></tr>
+</table>
+<h2>Bảng 5. Các thuộc tính của bộ dữ liệu PaySim</h2>
+<p class='meta'><b>Nguồn số liệu:</b> <code>Lược đồ khai báo trong code</code></p>
+<p class='meta'><b>Code tính ra:</b> <code>src/data_loader.py – PAYSIM_SCHEMA</code></p>
+<p class='nodata'>Bảng mô tả/lý thuyết – không có số liệu tính toán, không cần đối chiếu.</p>
+<h2>Bảng 6. Kết quả kiểm tra chất lượng dữ liệu</h2>
+<p class='meta'><b>Nguồn số liệu:</b> <code>outputs/metrics/quality.json</code></p>
+<p class='meta'><b>Code tính ra:</b> <code>src/data_loader.py – quality_report() và clean()</code></p>
+<table><tr><th>Tiêu chí</th><th>Giá trị</th><th>Khóa JSON / cách tính</th></tr>
+<tr><td class="">Số bản ghi ban đầu</td><td class="">6.362.620</td><td class="">rows = df.count()</td></tr>
+<tr><td class="">Số thuộc tính</td><td class="">11</td><td class="">columns = len(df.columns)</td></tr>
+<tr><td class="">Giá trị thiếu</td><td class="">0</td><td class="">tổng nulls (đếm isNull từng cột)</td></tr>
+<tr><td class="">Bản ghi trùng lặp</td><td class="">0</td><td class="">duplicates = count - dropDuplicates().count()</td></tr>
+<tr><td class="">Giá trị âm ở cột tiền tệ</td><td class="">0</td><td class="">tổng negatives</td></tr>
+<tr><td class="">Giao dịch có amount ≤ 0</td><td class="">16</td><td class="">zero_amount</td></tr>
+<tr><td class="">Số bản ghi sau làm sạch</td><td class="">6.362.620</td><td class="">clean_rows (đếm sau clean())</td></tr>
+<tr><td class="">Thời gian kiểm tra (giây)</td><td class="">131,6</td><td class="">time_s</td></tr>
+</table>
+<h2>Bảng 7. Thống kê giao dịch theo loại (Spark SQL)</h2>
+<p class='meta'><b>Nguồn số liệu:</b> <code>outputs/metrics/eda_stats.json → by_type</code></p>
+<p class='meta'><b>Code tính ra:</b> <code>src/stats.py – compute_stats(), mục 2:  SELECT type, COUNT(*), SUM(isFraud), ROUND(100*AVG(isFraud),4), AVG(amount) FROM transactions GROUP BY type</code></p>
+<table><tr><th>Loại</th><th>Số giao dịch</th><th>Gian lận</th><th>Tỷ lệ GL (%)</th><th>TB số tiền</th></tr>
+<tr><td class="">CASH_OUT</td><td class="">2.237.500</td><td class="">4.116</td><td class="">0,184</td><td class="">176.274</td></tr>
+<tr><td class="">PAYMENT</td><td class="">2.151.495</td><td class="">0</td><td class="">0,000</td><td class="">13.058</td></tr>
+<tr><td class="">CASH_IN</td><td class="">1.399.284</td><td class="">0</td><td class="">0,000</td><td class="">168.920</td></tr>
+<tr><td class="">TRANSFER</td><td class="">532.909</td><td class="">4.097</td><td class="">0,769</td><td class="">910.647</td></tr>
+<tr><td class="">DEBIT</td><td class="">41.432</td><td class="">0</td><td class="">0,000</td><td class="">5.484</td></tr>
+</table>
+<h2>Bảng 8. Thống kê số tiền theo nhãn</h2>
+<p class='meta'><b>Nguồn số liệu:</b> <code>outputs/metrics/eda_stats.json → amount_by_label</code></p>
+<p class='meta'><b>Code tính ra:</b> <code>src/stats.py mục 3:  SELECT isFraud, AVG(amount), percentile_approx(amount,0.5), STDDEV(amount), MAX(amount) FROM transactions GROUP BY isFraud</code></p>
+<table><tr><th>Nhãn</th><th>Trung bình</th><th>Trung vị</th><th>Độ lệch chuẩn</th><th>Lớn nhất</th></tr>
+<tr><td class="">Bình thường</td><td class="">178.197</td><td class="">74.667</td><td class="">596.237</td><td class="">92.445.517</td></tr>
+<tr><td class="">Gian lận</td><td class="">1.467.967</td><td class="">440.963</td><td class="">2.404.253</td><td class="">10.000.000</td></tr>
+</table>
+<h2>Bảng 9. Các mẫu số dư bất thường theo nhãn (TRANSFER, CASH_OUT)</h2>
+<p class='meta'><b>Nguồn số liệu:</b> <code>outputs/metrics/eda_stats.json → balance_patterns</code></p>
+<p class='meta'><b>Code tính ra:</b> <code>src/stats.py mục 5:  SELECT isFraud, 100*AVG(origZeroBalance), 100*AVG(destZeroBalance), 100*AVG(origEmptied), ... FROM rel GROUP BY isFraud  (rel = TRANSFER + CASH_OUT đã tạo đặc trưng)</code></p>
+<table><tr><th>Mẫu (% giao dịch)</th><th>Bình thường</th><th>Gian lận</th><th>Khóa JSON</th></tr>
+<tr><td class="">Số dư nguồn 0 → 0</td><td class="">47,37</td><td class="">0,50</td><td class="">pct_orig_zero</td></tr>
+<tr><td class="">Số dư đích 0 → 0</td><td class="">0,06</td><td class="">49,63</td><td class="">pct_dest_zero</td></tr>
+<tr><td class="">Rút sạch tài khoản nguồn</td><td class="">0,00</td><td class="">97,63</td><td class="">pct_orig_emptied</td></tr>
+<tr><td class="">Sai lệch số dư nguồn ≠ 0</td><td class="">90,58</td><td class="">0,55</td><td class="">pct_err_orig</td></tr>
+<tr><td class="">Sai lệch số dư đích ≠ 0</td><td class="">22,58</td><td class="">56,50</td><td class="">pct_err_dest</td></tr>
+</table>
+<h2>Bảng 10. Danh sách đặc trưng đầu vào của mô hình</h2>
+<p class='meta'><b>Nguồn số liệu:</b> <code>Định nghĩa trong code</code></p>
+<p class='meta'><b>Code tính ra:</b> <code>src/features.py – add_features(), FEATURE_NAMES</code></p>
+<p class='nodata'>Bảng mô tả/lý thuyết – không có số liệu tính toán, không cần đối chiếu.</p>
+<h2>Bảng 11. Quy mô các tập dữ liệu sau khi chia</h2>
+<p class='meta'><b>Nguồn số liệu:</b> <code>outputs/metrics/model_results.json → split</code></p>
+<p class='meta'><b>Code tính ra:</b> <code>src/modeling.py – stratified_split() (randomSplit seed=42 theo từng lớp) rồi .count()</code></p>
+<table><tr><th>Tập</th><th>Số giao dịch</th><th>Số gian lận</th><th>Tỷ lệ (%)</th></tr>
+<tr><td class="">Huấn luyện (70%)</td><td class="">193.250</td><td class="">358</td><td class="">0,185</td></tr>
+<tr><td class="">Kiểm định (10%)</td><td class="">27.870</td><td class="">27</td><td class="">0,097</td></tr>
+<tr><td class="">Kiểm thử (20%)</td><td class="">55.482</td><td class="">417</td><td class="">0,752</td></tr>
+</table>
+<p class='note'>Trọng số lớp (dùng trong đoạn văn mục 3.9): gian lận = 269,90, bình thường = 0,5009  (split.class_weights)</p>
+<h2>Bảng 12. Siêu tham số của các mô hình</h2>
+<p class='meta'><b>Nguồn số liệu:</b> <code>Khai báo trong code</code></p>
+<p class='meta'><b>Code tính ra:</b> <code>src/modeling.py – build_models()</code></p>
+<p class='nodata'>Bảng mô tả/lý thuyết – không có số liệu tính toán, không cần đối chiếu.</p>
+<h2>Bảng 13. Kết quả các mô hình trên tập kiểm thử</h2>
+<p class='meta'><b>Nguồn số liệu:</b> <code>outputs/metrics/model_results.json → results, rule_baseline</code></p>
+<p class='meta'><b>Code tính ra:</b> <code>src/modeling.py – tune_threshold() (t*, trên tập kiểm định), evaluate() (Precision/Recall/F1 từ ma trận nhầm lẫn; AUC-ROC, AUC-PR bằng BinaryClassificationEvaluator), rule_baseline()</code></p>
+<table><tr><th>Mô hình</th><th>t*</th><th>Precision</th><th>Recall</th><th>F1</th><th>AUC-ROC</th><th>AUC-PR</th></tr>
+<tr><td class="">LR</td><td class="">0,904</td><td class="">0,1951</td><td class="">0,0767</td><td class="">0,1102</td><td class="">0,7854</td><td class="">0,0490</td></tr>
+<tr><td class="">DT</td><td class="">0,995</td><td class="">0,6034</td><td class="">0,3357</td><td class="">0,4314</td><td class="">0,7040</td><td class="">0,3407</td></tr>
+<tr><td class="">RF</td><td class="">0,920</td><td class="">0,8689</td><td class="">0,1271</td><td class="">0,2218</td><td class="">0,7824</td><td class="">0,2250</td></tr>
+<tr><td class="">GBT</td><td class="">0,968</td><td class="">0,6443</td><td class="">0,2998</td><td class="">0,4092</td><td class="">0,7740</td><td class="">0,3220</td></tr>
+<tr><td class="">Luật hệ thống</td><td class="">–</td><td class="">0,0000</td><td class="">0,0000</td><td class="">0,0000</td><td class="">–</td><td class="">–</td></tr>
+</table>
+<p class='note'>Mô hình được chọn (best_model): Decision Tree  – tiêu chí AUC-PR, sau đó F1</p>
+<h2>Bảng 14. Chi tiết ma trận nhầm lẫn trên tập kiểm thử</h2>
+<p class='meta'><b>Nguồn số liệu:</b> <code>outputs/metrics/model_results.json → results</code></p>
+<p class='meta'><b>Code tính ra:</b> <code>src/modeling.py – evaluate(): đếm groupBy(isFraud, pred); Specificity = TN/(TN+FP); Accuracy = (TP+TN)/tổng</code></p>
+<table><tr><th>Mô hình</th><th>TP</th><th>FP</th><th>FN</th><th>TN</th><th>Specificity</th><th>Accuracy</th></tr>
+<tr><td class="">LR</td><td class="">32</td><td class="">132</td><td class="">385</td><td class="">54.933</td><td class="">0,99760</td><td class="">0,99068</td></tr>
+<tr><td class="">DT</td><td class="">140</td><td class="">92</td><td class="">277</td><td class="">54.973</td><td class="">0,99833</td><td class="">0,99335</td></tr>
+<tr><td class="">RF</td><td class="">53</td><td class="">8</td><td class="">364</td><td class="">55.057</td><td class="">0,99985</td><td class="">0,99330</td></tr>
+<tr><td class="">GBT</td><td class="">125</td><td class="">69</td><td class="">292</td><td class="">54.996</td><td class="">0,99875</td><td class="">0,99349</td></tr>
+</table>
+<h2>Bảng 15. So sánh kết quả tại ngưỡng 0,5 và ngưỡng t*</h2>
+<p class='meta'><b>Nguồn số liệu:</b> <code>outputs/metrics/model_results.json → results[...].at_default_0_5 và results[...]</code></p>
+<p class='meta'><b>Code tính ra:</b> <code>src/modeling.py – evaluate(pred, 0.5) và evaluate(pred, t*)</code></p>
+<table><tr><th>Mô hình</th><th>Ngưỡng</th><th>FP</th><th>FN</th><th>Precision</th><th>Recall</th><th>F1</th></tr>
+<tr><td class="">LR</td><td class="">0,5</td><td class="">11.544</td><td class="">121</td><td class="">0,0250</td><td class="">0,7098</td><td class="">0,0483</td></tr>
+<tr><td class=""></td><td class="">0,904</td><td class="">132</td><td class="">385</td><td class="">0,1951</td><td class="">0,0767</td><td class="">0,1102</td></tr>
+<tr><td class="">DT</td><td class="">0,5</td><td class="">8.869</td><td class="">156</td><td class="">0,0286</td><td class="">0,6259</td><td class="">0,0547</td></tr>
+<tr><td class=""></td><td class="">0,995</td><td class="">92</td><td class="">277</td><td class="">0,6034</td><td class="">0,3357</td><td class="">0,4314</td></tr>
+<tr><td class="">RF</td><td class="">0,5</td><td class="">3.356</td><td class="">232</td><td class="">0,0522</td><td class="">0,4436</td><td class="">0,0935</td></tr>
+<tr><td class=""></td><td class="">0,920</td><td class="">8</td><td class="">364</td><td class="">0,8689</td><td class="">0,1271</td><td class="">0,2218</td></tr>
+<tr><td class="">GBT</td><td class="">0,5</td><td class="">8.044</td><td class="">161</td><td class="">0,0308</td><td class="">0,6139</td><td class="">0,0587</td></tr>
+<tr><td class=""></td><td class="">0,968</td><td class="">69</td><td class="">292</td><td class="">0,6443</td><td class="">0,2998</td><td class="">0,4092</td></tr>
+</table>
+<h2>Bảng 16. Thời gian huấn luyện và dự đoán</h2>
+<p class='meta'><b>Nguồn số liệu:</b> <code>outputs/metrics/model_results.json → train_time_s, predict_time_s</code></p>
+<p class='meta'><b>Code tính ra:</b> <code>src/modeling.py – đo time.time() quanh pipe.fit(train) và evaluate(test)</code></p>
+<table><tr><th>Mô hình</th><th>Huấn luyện (giây)</th><th>Dự đoán tập kiểm thử (giây)</th></tr>
+<tr><td class="">Logistic Regression</td><td class="">2,6</td><td class="">0,8</td></tr>
+<tr><td class="">Decision Tree</td><td class="">2,8</td><td class="">0,6</td></tr>
+<tr><td class="">Random Forest</td><td class="">21,9</td><td class="">1,2</td></tr>
+<tr><td class="">GBT</td><td class="">55,4</td><td class="">0,8</td></tr>
+</table>
+<h2>Các con số quan trọng trong đoạn văn</h2><table><tr><th>Mục</th><th>Nội dung</th><th>Giá trị</th><th>Nguồn (JSON)</th></tr>
+<tr><td>Tóm tắt, 3.6</td><td>Số giao dịch gian lận</td><td class="">8.213</td><td>eda_stats.label</td></tr>
+<tr><td>Tóm tắt, 3.6</td><td>Tỷ lệ gian lận (%)</td><td class="">0,129</td><td>eda_stats.label.pct</td></tr>
+<tr><td>3.6</td><td>Số giao dịch bình thường</td><td class="">6.354.407</td><td>eda_stats.label</td></tr>
+<tr><td>3.6</td><td>Gian lận đúng hạn mức 10 triệu</td><td class="">287</td><td>eda_stats.max_fraud_amount</td></tr>
+<tr><td>3.7</td><td>Số giao dịch TRANSFER + CASH_OUT</td><td class="">2.770.409</td><td>eda_stats.relevant_rows</td></tr>
+<tr><td>3.7</td><td>3 giờ tỷ lệ gian lận cao nhất</td><td class="">5 giờ, 4 giờ, 3 giờ</td><td>eda_stats.by_hour</td></tr>
+<tr><td>1.2, 3.7</td><td>Số giao dịch luật isFlaggedFraud gắn cờ</td><td class="">16</td><td>eda_stats.flagged</td></tr>
+<tr><td>3.3</td><td>Số tài khoản nguồn khác nhau</td><td class="">6.353.307</td><td>eda_stats.unique_accounts</td></tr>
+<tr><td>3.9</td><td>Trọng số lớp gian lận</td><td class="">269,90</td><td>model_results.split.class_weights</td></tr>
+<tr><td>Tóm tắt, 4.1, 4.7, 5.1</td><td>F1 của Decision Tree</td><td class="">0,4314</td><td>model_results.results</td></tr>
+<tr><td>Tóm tắt, 4.1, 4.7</td><td>Precision của Decision Tree</td><td class="">0,6034</td><td>model_results.results</td></tr>
+<tr><td>Tóm tắt, 4.1, 4.7</td><td>Recall của Decision Tree</td><td class="">0,3357</td><td>model_results.results</td></tr>
+<tr><td>Tóm tắt, 4.1, 5.1</td><td>AUC-PR của Decision Tree</td><td class="">0,3407</td><td>model_results.results</td></tr>
+<tr><td>4.7</td><td>Ngưỡng t* của Decision Tree</td><td class="">0,995</td><td>model_results.results.threshold</td></tr>
+<tr><td>Tóm tắt</td><td>Recall của luật isFlaggedFraud</td><td class="">0,0000</td><td>model_results.rule_baseline</td></tr>
+<tr><td>4.5</td><td>Độ quan trọng của đặc trưng hạng 1 (log_amount)</td><td class="">0,469</td><td>model_results.feature_importance</td></tr>
+<tr><td>4.5</td><td>Độ quan trọng của đặc trưng hạng 2 (hour)</td><td class="">0,314</td><td>model_results.feature_importance</td></tr>
+<tr><td>4.5</td><td>Độ quan trọng của đặc trưng hạng 3 (type_CASH_OUT)</td><td class="">0,217</td><td>model_results.feature_importance</td></tr>
+</table>
+<h2>Ghi chú</h2><ul class='note'><li>Mọi tệp JSON được sinh ra khi chạy <code>python main.py</code> (bước 5, 6, 10, 11).</li><li>Hình trong báo cáo được vẽ từ cùng các khóa JSON này (xem cột Nguồn).</li><li>Ô đỏ thường do: Word chưa cập nhật số mới, hoặc gõ định dạng khác (ví dụ 0.9975 thay vì 0,9975).</li></ul></body></html>

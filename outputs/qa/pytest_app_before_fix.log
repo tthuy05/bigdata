@@ -1,0 +1,103 @@
+FF..............F.                                                       [100%]
+================================== FAILURES ===================================
+______ test_streamlit_three_tabs_single_prediction_and_profile_contract _______
+
+    def test_streamlit_three_tabs_single_prediction_and_profile_contract():
+        app = AppTest.from_file(str(Path(config.BASE_DIR) / "app/app.py"), default_timeout=120).run()
+        assert not app.exception
+        assert len(app.tabs) == 3
+        assert [t.label for t in app.tabs] == ["\U0001f50d Ki\u1ec3m tra m\u1ed9t giao d\u1ecbch", "\U0001f4c2 Ki\u1ec3m tra theo l\xf4 (CSV)", "\U0001f4ca Th\u1ed1ng k\xea & \u0111\xe1nh gi\xe1"]
+        labels = [n.label for n in app.number_input]
+        if Path(config.EXPERIMENT_MANIFEST).is_file():
+            assert not any("newbalance" in label or "oldbalance" in label for label in labels)
+        button = next(b for b in app.button if b.label == "Ph\xe2n t\xedch giao d\u1ecbch")
+        button.click().run()
+        assert not app.exception and any(m.label == "\u0110i\u1ec3m r\u1ee7i ro" for m in app.metric)
+        assert any(m.label == "Ng\u01b0\u1ee1ng quy\u1ebft \u0111\u1ecbnh" for m in app.metric)
+        assert len(app.dataframe) >= 2
+        if Path(config.EXPERIMENT_MANIFEST).is_file():
+            experiment_selector = next(s for s in app.selectbox if s.label == "Th\xed nghi\u1ec7m")
+            experiment_selector.select("A_stratified").run()
+            assert not app.exception
+>           assert any("newbalanceOrig" in n.label for n in app.number_input)
+E           assert False
+E            +  where False = any(<generator object test_streamlit_three_tabs_single_prediction_and_profile_contract.<locals>.<genexpr> at 0x0000024F324828E0>)
+
+tests\test_app.py:31: AssertionError
+---------------------------- Captured stderr call -----------------------------
+2026-10-13 12:52:59.988 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+
+------------------------------ Captured log call ------------------------------
+WARNING  streamlit.runtime.scriptrunner_utils.script_run_context:script_run_context.py:483 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+______________ test_current_bundle_csv_predictions_and_bad_rows _______________
+
+spark = <pyspark.sql.session.SparkSession object at 0x0000024F32097D10>
+
+    def test_current_bundle_csv_predictions_and_bad_rows(spark):
+>       model, info = load_bundle(spark)
+                      ^^^^^^^^^^^^^^^^^^
+
+tests\test_app.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\prediction.py:67: in load_bundle
+    model = load_pipeline(str(selected))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:\\Users\\nguye\\OneDrive\\Desktop\\Project\\fraud_detection_spark_v3\\fraud_detection_spark\\outputs\\experiments\\20261013T052452Z_6331e780\\B_temporal\\models\\decision_tree'
+
+    def load_pipeline(path):
+        if not (Path(path) / "metadata").is_dir():
+            raise FileNotFoundError(f"Thi\u1ebfu PipelineModel: {path}")
+        spark = SparkSession.getActiveSession()
+        if spark is None:
+>           raise RuntimeError("C\u1ea7n SparkSession tr\u01b0\u1edbc khi n\u1ea1p m\xf4 h\xecnh.")
+E           RuntimeError: C\u1ea7n SparkSession tr\u01b0\u1edbc khi n\u1ea1p m\xf4 h\xecnh.
+
+src\model_io.py:18: RuntimeError
+_________ test_legacy_bundle_load_prediction_order_invalid_and_scope __________
+
+spark = <pyspark.sql.session.SparkSession object at 0x0000024F32097D10>
+tmp_path = WindowsPath('C:/Users/nguye/AppData/Local/Temp/pytest-of-nguye/pytest-1/test_legacy_bundle_load_predic0')
+
+    def test_legacy_bundle_load_prediction_order_invalid_and_scope(spark, tmp_path):
+        info_path = tmp_path / "info.json"
+        info_path.write_text(json.dumps({"name": "Random Forest", "threshold": 1.0,
+                                         "model_path": str(Path(config.MODEL_DIR) / "random_forest")}), encoding="utf-8")
+>       model, info = load_bundle(spark, info_path=str(info_path))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_pipeline.py:143: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\prediction.py:67: in load_bundle
+    model = load_pipeline(str(selected))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:\\Users\\nguye\\OneDrive\\Desktop\\Project\\fraud_detection_spark_v3\\fraud_detection_spark\\models\\random_forest'
+
+    def load_pipeline(path):
+        if not (Path(path) / "metadata").is_dir():
+            raise FileNotFoundError(f"Thi\u1ebfu PipelineModel: {path}")
+        spark = SparkSession.getActiveSession()
+        if spark is None:
+>           raise RuntimeError("C\u1ea7n SparkSession tr\u01b0\u1edbc khi n\u1ea1p m\xf4 h\xecnh.")
+E           RuntimeError: C\u1ea7n SparkSession tr\u01b0\u1edbc khi n\u1ea1p m\xf4 h\xecnh.
+
+src\model_io.py:18: RuntimeError
+============================== warnings summary ===============================
+tests/test_pipeline.py: 16 warnings
+  C:\Users\nguye\OneDrive\Desktop\Project\fraud_detection_spark_v3\fraud_detection_spark\.venv\Lib\site-packages\pyspark\sql\pandas\utils.py:37: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+    if LooseVersion(pandas.__version__) < LooseVersion(minimum_pandas_version):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_app.py::test_streamlit_three_tabs_single_prediction_and_profile_contract
+FAILED tests/test_app.py::test_current_bundle_csv_predictions_and_bad_rows - ...
+FAILED tests/test_pipeline.py::test_legacy_bundle_load_prediction_order_invalid_and_scope
+3 failed, 15 passed, 16 warnings in 44.94s
+SUCCESS: The process with PID 10684 (child process of PID 24936) has been terminated.
+SUCCESS: The process with PID 24936 (child process of PID 21812) has been terminated.
+SUCCESS: The process with PID 21812 (child process of PID 23224) has been terminated.

@@ -1,0 +1,25 @@
+Collecting scipy<1.15,>=1.11
+  Downloading scipy-1.14.1-cp312-cp312-win_amd64.whl.metadata (60 kB)
+Collecting scikit-learn<1.6,>=1.3
+  Downloading scikit_learn-1.5.2-cp312-cp312-win_amd64.whl.metadata (13 kB)
+Requirement already satisfied: numpy<2.3,>=1.23.5 in c:\users\nguye\onedrive\desktop\project\fraud_detection_spark_v3\fraud_detection_spark\.venv\lib\site-packages (from scipy<1.15,>=1.11) (1.26.4)
+Requirement already satisfied: joblib>=1.2.0 in c:\users\nguye\onedrive\desktop\project\fraud_detection_spark_v3\fraud_detection_spark\.venv\lib\site-packages (from scikit-learn<1.6,>=1.3) (1.6.0)
+Requirement already satisfied: threadpoolctl>=3.1.0 in c:\users\nguye\onedrive\desktop\project\fraud_detection_spark_v3\fraud_detection_spark\.venv\lib\site-packages (from scikit-learn<1.6,>=1.3) (3.7.0)
+Requirement already satisfied: cloudpickle>=3.0 in c:\users\nguye\onedrive\desktop\project\fraud_detection_spark_v3\fraud_detection_spark\.venv\lib\site-packages (from joblib>=1.2.0->scikit-learn<1.6,>=1.3) (3.1.2)
+Downloading scipy-1.14.1-cp312-cp312-win_amd64.whl (44.5 MB)
+   ---------------------------------------- 44.5/44.5 MB 25.1 MB/s eta 0:00:00
+Downloading scikit_learn-1.5.2-cp312-cp312-win_amd64.whl (11.0 MB)
+   ---------------------------------------- 11.0/11.0 MB 14.6 MB/s eta 0:00:00
+Installing collected packages: scipy, scikit-learn
+  Attempting uninstall: scipy
+    Found existing installation: scipy 1.18.1
+    Uninstalling scipy-1.18.1:
+      Successfully uninstalled scipy-1.18.1
+  Attempting uninstall: scikit-learn
+    Found existing installation: scikit-learn 1.9.1
+    Uninstalling scikit-learn-1.9.1:
+      Successfully uninstalled scikit-learn-1.9.1
+Successfully installed scikit-learn-1.5.2 scipy-1.14.1
+
+[notice] A new release of pip is available: 25.0.1 -> 26.2.1
+[notice] To update, run: C:\Users\nguye\OneDrive\Desktop\Project\fraud_detection_spark_v3\fraud_detection_spark\.venv\Scripts\python.exe -m pip install --upgrade pip

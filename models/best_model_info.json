@@ -1,0 +1,64 @@
+{
+  "name": "Decision Tree",
+  "threshold": 0.9945363711208896,
+  "metrics": {
+    "TP": 140,
+    "TN": 54973,
+    "FP": 92,
+    "FN": 277,
+    "precision": 0.603448275862069,
+    "recall": 0.33573141486810554,
+    "f1": 0.4314329738058552,
+    "accuracy": 0.9933491943332973,
+    "specificity": 0.9983292472532461,
+    "auc_roc": 0.704049280325127,
+    "auc_pr": 0.3406992182061733,
+    "at_default_0_5": {
+      "TP": 261,
+      "FP": 8869,
+      "FN": 156,
+      "precision": 0.028587075575027383,
+      "recall": 0.6258992805755396,
+      "f1": 0.05467686184141615
+    },
+    "threshold": 0.9945363711208896,
+    "train_time_s": 2.8,
+    "predict_time_s": 0.626,
+    "validation": {
+      "TP": 6,
+      "TN": 27842,
+      "FP": 1,
+      "FN": 21,
+      "precision": 0.8571428571428571,
+      "recall": 0.2222222222222222,
+      "f1": 0.35294117647058826,
+      "accuracy": 0.999210620739146,
+      "specificity": 0.9999640843299932,
+      "auc_roc": 0.653426421429151,
+      "auc_pr": 0.25105380123269283
+    },
+    "evaluation_scope": "test",
+    "score_column": "probability[1]",
+    "auc_method": "Spark BinaryClassificationEvaluator numBins=0",
+    "timing_scope": "fit only; transform+cache materialization only; excludes metrics",
+    "selected_before_test": true
+  },
+  "feature_profile": "pre_transaction",
+  "features": [
+    "type_CASH_OUT",
+    "log_amount",
+    "hour"
+  ],
+  "run_id": "20261013T052452Z_6331e780",
+  "experiment": "B_temporal",
+  "model_path": "outputs\\experiments\\20261013T052452Z_6331e780\\B_temporal\\models\\decision_tree",
+  "selection": {
+    "dataset": "validation",
+    "criteria": [
+      "auc_pr",
+      "f1",
+      "precision"
+    ]
+  },
+  "status": "VERIFIED"
+}

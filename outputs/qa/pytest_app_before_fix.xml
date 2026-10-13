@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="18" time="44.927" timestamp="2026-10-13T12:52:57.942570+07:00" hostname="tthuy005"><testcase classname="tests.test_app" name="test_streamlit_three_tabs_single_prediction_and_profile_contract" time="13.323"><failure message="assert False&#10; +  where False = any(&lt;generator object test_streamlit_three_tabs_single_prediction_and_profile_contract.&lt;locals&gt;.&lt;genexpr&gt; at 0x0000024F324828E0&gt;)">def test_streamlit_three_tabs_single_prediction_and_profile_contract():
+        app = AppTest.from_file(str(Path(config.BASE_DIR) / "app/app.py"), default_timeout=120).run()
+        assert not app.exception
+        assert len(app.tabs) == 3
+        assert [t.label for t in app.tabs] == ["🔍 Kiểm tra một giao dịch", "📂 Kiểm tra theo lô (CSV)", "📊 Thống kê &amp; đánh giá"]
+        labels = [n.label for n in app.number_input]
+        if Path(config.EXPERIMENT_MANIFEST).is_file():
+            assert not any("newbalance" in label or "oldbalance" in label for label in labels)
+        button = next(b for b in app.button if b.label == "Phân tích giao dịch")
+        button.click().run()
+        assert not app.exception and any(m.label == "Điểm rủi ro" for m in app.metric)
+        assert any(m.label == "Ngưỡng quyết định" for m in app.metric)
+        assert len(app.dataframe) &gt;= 2
+        if Path(config.EXPERIMENT_MANIFEST).is_file():
+            experiment_selector = next(s for s in app.selectbox if s.label == "Thí nghiệm")
+            experiment_selector.select("A_stratified").run()
+            assert not app.exception
+&gt;           assert any("newbalanceOrig" in n.label for n in app.number_input)
+E           assert False
+E            +  where False = any(&lt;generator object test_streamlit_three_tabs_single_prediction_and_profile_contract.&lt;locals&gt;.&lt;genexpr&gt; at 0x0000024F324828E0&gt;)
+
+tests\test_app.py:31: AssertionError</failure></testcase><testcase classname="tests.test_app" name="test_current_bundle_csv_predictions_and_bad_rows" time="0.015"><failure message="RuntimeError: Cần SparkSession trước khi nạp mô hình.">spark = &lt;pyspark.sql.session.SparkSession object at 0x0000024F32097D10&gt;
+
+    def test_current_bundle_csv_predictions_and_bad_rows(spark):
+&gt;       model, info = load_bundle(spark)
+                      ^^^^^^^^^^^^^^^^^^
+
+tests\test_app.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\prediction.py:67: in load_bundle
+    model = load_pipeline(str(selected))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:\\Users\\nguye\\OneDrive\\Desktop\\Project\\fraud_detection_spark_v3\\fraud_detection_spark\\outputs\\experiments\\20261013T052452Z_6331e780\\B_temporal\\models\\decision_tree'
+
+    def load_pipeline(path):
+        if not (Path(path) / "metadata").is_dir():
+            raise FileNotFoundError(f"Thiếu PipelineModel: {path}")
+        spark = SparkSession.getActiveSession()
+        if spark is None:
+&gt;           raise RuntimeError("Cần SparkSession trước khi nạp mô hình.")
+E           RuntimeError: Cần SparkSession trước khi nạp mô hình.
+
+src\model_io.py:18: RuntimeError</failure></testcase><testcase classname="tests.test_app" name="test_current_experiment_artifact_consistency" time="0.008" /><testcase classname="tests.test_app" name="test_streamlit_csv_branch_and_download_payload" time="0.668" /><testcase classname="tests.test_app" name="test_streamlit_bad_csv_shows_vietnamese_error" time="0.260" /><testcase classname="tests.test_pipeline" name="test_cleaning_keeps_zero_fraud_and_accounts_each_removal" time="5.810" /><testcase classname="tests.test_pipeline" name="test_malformed_csv_fails_instead_of_silently_discarding" time="0.476" /><testcase classname="tests.test_pipeline" name="test_feature_values_and_pre_profile_never_reads_balances" time="0.200" /><testcase classname="tests.test_pipeline" name="test_splits_disjoint_complete_and_reproducible[stratified]" time="1.952" /><testcase classname="tests.test_pipeline" name="test_splits_disjoint_complete_and_reproducible[temporal]" time="0.827" /><testcase classname="tests.test_pipeline" name="test_weights_use_train_counts_and_reject_missing_class" time="0.589" /><testcase classname="tests.test_pipeline" name="test_scaler_fits_train_only" time="0.819" /><testcase classname="tests.test_pipeline" name="test_threshold_exact_and_selection_ignores_test" time="0.002" /><testcase classname="tests.test_pipeline" name="test_curve_boundary_matches_spark_auc" time="0.873" /><testcase classname="tests.test_pipeline" name="test_csv_validation_invalid_money_step_type_and_empty" time="0.007" /><testcase classname="tests.test_pipeline" name="test_saved_missing_never_calls_fit" time="0.034" /><testcase classname="tests.test_pipeline" name="test_legacy_bundle_load_prediction_order_invalid_and_scope" time="0.020"><failure message="RuntimeError: Cần SparkSession trước khi nạp mô hình.">spark = &lt;pyspark.sql.session.SparkSession object at 0x0000024F32097D10&gt;
+tmp_path = WindowsPath('C:/Users/nguye/AppData/Local/Temp/pytest-of-nguye/pytest-1/test_legacy_bundle_load_predic0')
+
+    def test_legacy_bundle_load_prediction_order_invalid_and_scope(spark, tmp_path):
+        info_path = tmp_path / "info.json"
+        info_path.write_text(json.dumps({"name": "Random Forest", "threshold": 1.0,
+                                         "model_path": str(Path(config.MODEL_DIR) / "random_forest")}), encoding="utf-8")
+&gt;       model, info = load_bundle(spark, info_path=str(info_path))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_pipeline.py:143: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\prediction.py:67: in load_bundle
+    model = load_pipeline(str(selected))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:\\Users\\nguye\\OneDrive\\Desktop\\Project\\fraud_detection_spark_v3\\fraud_detection_spark\\models\\random_forest'
+
+    def load_pipeline(path):
+        if not (Path(path) / "metadata").is_dir():
+            raise FileNotFoundError(f"Thiếu PipelineModel: {path}")
+        spark = SparkSession.getActiveSession()
+        if spark is None:
+&gt;           raise RuntimeError("Cần SparkSession trước khi nạp mô hình.")
+E           RuntimeError: Cần SparkSession trước khi nạp mô hình.
+
+src\model_io.py:18: RuntimeError</failure></testcase><testcase classname="tests.test_pipeline" name="test_four_spark_algorithms_fit_save_and_evaluate" time="16.945" /></testsuite></testsuites>

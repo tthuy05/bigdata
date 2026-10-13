@@ -1,0 +1,29 @@
+{
+  "rows": 6362620,
+  "columns": 11,
+  "nulls": {
+    "step": 0,
+    "type": 0,
+    "amount": 0,
+    "nameOrig": 0,
+    "oldbalanceOrg": 0,
+    "newbalanceOrig": 0,
+    "nameDest": 0,
+    "oldbalanceDest": 0,
+    "newbalanceDest": 0,
+    "isFraud": 0,
+    "isFlaggedFraud": 0
+  },
+  "duplicates": 0,
+  "negatives": {
+    "amount": 0,
+    "oldbalanceOrg": 0,
+    "newbalanceOrig": 0,
+    "oldbalanceDest": 0,
+    "newbalanceDest": 0
+  },
+  "zero_amount": 16,
+  "time_s": 14.0,
+  "clean_rows": 6362604,
+  "clean_parquet_time_s": 18.1
+}

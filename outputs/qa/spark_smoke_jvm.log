@@ -1,0 +1,9 @@
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+SPARK 3.5.3
+[Row(step=1, type='PAYMENT', amount=9839.64, nameOrig='C1231006815', oldbalanceOrg=170136.0, newbalanceOrig=160296.36, nameDest='M1979787155', oldbalanceDest=0.0, newbalanceDest=0.0, isFraud=0, isFlaggedFraud=0)]
+MODEL PipelineModel
+WRITE_OK
+SUCCESS: The process with PID 6636 (child process of PID 6468) has been terminated.
+SUCCESS: The process with PID 6468 (child process of PID 13944) has been terminated.
+SUCCESS: The process with PID 13944 (child process of PID 15200) has been terminated.

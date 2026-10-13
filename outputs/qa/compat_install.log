@@ -1,0 +1,33 @@
+Collecting setuptools
+  Using cached setuptools-84.0.0-py3-none-any.whl.metadata (6.6 kB)
+Collecting numpy<2,>=1.24
+  Downloading numpy-1.26.4-cp312-cp312-win_amd64.whl.metadata (61 kB)
+Collecting pandas<3,>=2
+  Downloading pandas-2.3.3-cp312-cp312-win_amd64.whl.metadata (19 kB)
+Requirement already satisfied: python-dateutil>=2.8.2 in c:\users\nguye\onedrive\desktop\project\fraud_detection_spark_v3\fraud_detection_spark\.venv\lib\site-packages (from pandas<3,>=2) (2.9.0.post0)
+Collecting pytz>=2020.1 (from pandas<3,>=2)
+  Downloading pytz-2026.5-py2.py3-none-any.whl.metadata (22 kB)
+Requirement already satisfied: tzdata>=2022.7 in c:\users\nguye\onedrive\desktop\project\fraud_detection_spark_v3\fraud_detection_spark\.venv\lib\site-packages (from pandas<3,>=2) (2026.5)
+Requirement already satisfied: six>=1.5 in c:\users\nguye\onedrive\desktop\project\fraud_detection_spark_v3\fraud_detection_spark\.venv\lib\site-packages (from python-dateutil>=2.8.2->pandas<3,>=2) (1.17.0)
+Using cached setuptools-84.0.0-py3-none-any.whl (818 kB)
+Downloading numpy-1.26.4-cp312-cp312-win_amd64.whl (15.5 MB)
+   ---------------------------------------- 15.5/15.5 MB 27.1 MB/s eta 0:00:00
+Downloading pandas-2.3.3-cp312-cp312-win_amd64.whl (11.0 MB)
+   ---------------------------------------- 11.0/11.0 MB 29.9 MB/s eta 0:00:00
+Downloading pytz-2026.5-py2.py3-none-any.whl (506 kB)
+Installing collected packages: pytz, setuptools, numpy, pandas
+  Attempting uninstall: numpy
+    Found existing installation: numpy 2.5.4
+    Uninstalling numpy-2.5.4:
+      Successfully uninstalled numpy-2.5.4
+  Attempting uninstall: pandas
+    Found existing installation: pandas 3.0.6
+    Uninstalling pandas-3.0.6:
+      Successfully uninstalled pandas-3.0.6
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+contourpy 1.4.0 requires numpy>=2.0, but you have numpy 1.26.4 which is incompatible.
+scipy 1.18.1 requires numpy<2.8,>=2.0.0, but you have numpy 1.26.4 which is incompatible.
+Successfully installed numpy-1.26.4 pandas-2.3.3 pytz-2026.5 setuptools-84.0.0
+
+[notice] A new release of pip is available: 25.0.1 -> 26.2.1
+[notice] To update, run: C:\Users\nguye\OneDrive\Desktop\Project\fraud_detection_spark_v3\fraud_detection_spark\.venv\Scripts\python.exe -m pip install --upgrade pip

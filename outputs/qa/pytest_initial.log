@@ -1,0 +1,11 @@
+............                                                             [100%]
+============================== warnings summary ===============================
+tests/test_pipeline.py: 16 warnings
+  C:\Users\nguye\OneDrive\Desktop\Project\fraud_detection_spark_v3\fraud_detection_spark\.venv\Lib\site-packages\pyspark\sql\pandas\utils.py:37: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+    if LooseVersion(pandas.__version__) < LooseVersion(minimum_pandas_version):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+12 passed, 16 warnings in 112.84s (0:01:52)
+SUCCESS: The process with PID 21308 (child process of PID 19676) has been terminated.
+SUCCESS: The process with PID 19676 (child process of PID 16304) has been terminated.
+SUCCESS: The process with PID 16304 (child process of PID 7988) has been terminated.

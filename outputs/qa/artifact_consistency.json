@@ -1,0 +1,20 @@
+{
+  "status": "VERIFIED",
+  "run_id": "20261013T052452Z_6331e780",
+  "experiments": 4,
+  "algorithms": 16,
+  "checks": [
+    "counts/metrics",
+    "train weights",
+    "validation selection",
+    "A/B equal splits",
+    "run_id/source hash",
+    "primary artifact identity",
+    "EDA/quality counts",
+    "exact Word table cells"
+  ],
+  "docx_tables": 19,
+  "docx_images": 14,
+  "docx_cells_verified": 140,
+  "visual_layout_status": "NOT VERIFIED until render and all-page PNG inspection"
+}

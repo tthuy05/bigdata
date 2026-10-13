@@ -1,0 +1,68 @@
+
+[1m--- Hình kết quả mô hình ----------------------------------------------------[0m
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\A_stratified\figures\fig_metrics_comparison.png
+      Số liệu lấy từ : model_results.json → results (bảng so sánh ở bước 10)
+      Giá trị trên hình: chiều cao cột = Precision, Recall, F1, AUC-PR của từng mô hình
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\A_stratified\figures\fig_confusion_matrices.png
+      Số liệu lấy từ : model_results.json → TP/FP/FN/TN (bảng ở bước 10)
+      Giá trị trên hình: Logistic Regression: FP=0 FN=6; Decision Tree: FP=0 FN=1; Random Forest: FP=0 FN=2; GBT: FP=0 FN=2
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\A_stratified\figures\fig_roc_curves.png
+      Số liệu lấy từ : xác suất dự đoán của 4 mô hình trên tập kiểm thử (bước 9)
+      Giá trị trên hình: diện tích ROC: Logistic Regression: 0.9969, Decision Tree: 0.9969, Random Forest: 0.9965, GBT: 0.9936
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\A_stratified\figures\fig_pr_curves.png
+      Số liệu lấy từ : xác suất dự đoán của 4 mô hình trên tập kiểm thử (bước 9)
+      Giá trị trên hình: vẽ từ (xác suất dự đoán, nhãn thật) của toàn bộ tập kiểm thử
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\A_stratified\figures\fig_feature_importance.png
+      Số liệu lấy từ : model_results.json → feature_importance (bước 10)
+      Giá trị trên hình: top 3: origEmptied = 0.938, slog_errorBalanceDest = 0.045, log_amount = 0.007
+
+[1m--- Hình kết quả mô hình ----------------------------------------------------[0m
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\B_stratified\figures\fig_metrics_comparison.png
+      Số liệu lấy từ : model_results.json → results (bảng so sánh ở bước 10)
+      Giá trị trên hình: chiều cao cột = Precision, Recall, F1, AUC-PR của từng mô hình
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\B_stratified\figures\fig_confusion_matrices.png
+      Số liệu lấy từ : model_results.json → TP/FP/FN/TN (bảng ở bước 10)
+      Giá trị trên hình: Logistic Regression: FP=191 FN=145; Decision Tree: FP=71 FN=104; Random Forest: FP=13 FN=131; GBT: FP=28 FN=117
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\B_stratified\figures\fig_roc_curves.png
+      Số liệu lấy từ : xác suất dự đoán của 4 mô hình trên tập kiểm thử (bước 9)
+      Giá trị trên hình: diện tích ROC: Logistic Regression: 0.7817, Decision Tree: 0.7234, Random Forest: 0.8307, GBT: 0.8348
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\B_stratified\figures\fig_pr_curves.png
+      Số liệu lấy từ : xác suất dự đoán của 4 mô hình trên tập kiểm thử (bước 9)
+      Giá trị trên hình: vẽ từ (xác suất dự đoán, nhãn thật) của toàn bộ tập kiểm thử
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\B_stratified\figures\fig_feature_importance.png
+      Số liệu lấy từ : model_results.json → feature_importance (bước 10)
+      Giá trị trên hình: top 3: log_amount = 0.443, hour = 0.442, type_CASH_OUT = 0.115
+
+[1m--- Hình kết quả mô hình ----------------------------------------------------[0m
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\A_temporal\figures\fig_metrics_comparison.png
+      Số liệu lấy từ : model_results.json → results (bảng so sánh ở bước 10)
+      Giá trị trên hình: chiều cao cột = Precision, Recall, F1, AUC-PR của từng mô hình
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\A_temporal\figures\fig_confusion_matrices.png
+      Số liệu lấy từ : model_results.json → TP/FP/FN/TN (bảng ở bước 10)
+      Giá trị trên hình: Logistic Regression: FP=0 FN=19; Decision Tree: FP=0 FN=15; Random Forest: FP=0 FN=5; GBT: FP=0 FN=4
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\A_temporal\figures\fig_roc_curves.png
+      Số liệu lấy từ : xác suất dự đoán của 4 mô hình trên tập kiểm thử (bước 9)
+      Giá trị trên hình: diện tích ROC: Logistic Regression: 0.9929, Decision Tree: 0.9952, Random Forest: 1.0000, GBT: 0.9989
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\A_temporal\figures\fig_pr_curves.png
+      Số liệu lấy từ : xác suất dự đoán của 4 mô hình trên tập kiểm thử (bước 9)
+      Giá trị trên hình: vẽ từ (xác suất dự đoán, nhãn thật) của toàn bộ tập kiểm thử
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\A_temporal\figures\fig_feature_importance.png
+      Số liệu lấy từ : model_results.json → feature_importance (bước 10)
+      Giá trị trên hình: top 3: origEmptied = 0.947, slog_errorBalanceDest = 0.032, log_oldbalanceDest = 0.009
+
+[1m--- Hình kết quả mô hình ----------------------------------------------------[0m
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\B_temporal\figures\fig_metrics_comparison.png
+      Số liệu lấy từ : model_results.json → results (bảng so sánh ở bước 10)
+      Giá trị trên hình: chiều cao cột = Precision, Recall, F1, AUC-PR của từng mô hình
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\B_temporal\figures\fig_confusion_matrices.png
+      Số liệu lấy từ : model_results.json → TP/FP/FN/TN (bảng ở bước 10)
+      Giá trị trên hình: Logistic Regression: FP=132 FN=385; Decision Tree: FP=92 FN=277; Random Forest: FP=8 FN=364; GBT: FP=69 FN=292
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\B_temporal\figures\fig_roc_curves.png
+      Số liệu lấy từ : xác suất dự đoán của 4 mô hình trên tập kiểm thử (bước 9)
+      Giá trị trên hình: diện tích ROC: Logistic Regression: 0.7854, Decision Tree: 0.7040, Random Forest: 0.7824, GBT: 0.7740
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\B_temporal\figures\fig_pr_curves.png
+      Số liệu lấy từ : xác suất dự đoán của 4 mô hình trên tập kiểm thử (bước 9)
+      Giá trị trên hình: vẽ từ (xác suất dự đoán, nhãn thật) của toàn bộ tập kiểm thử
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\B_temporal\figures\fig_feature_importance.png
+      Số liệu lấy từ : model_results.json → feature_importance (bước 10)
+      Giá trị trên hình: top 3: log_amount = 0.469, hour = 0.314, type_CASH_OUT = 0.217

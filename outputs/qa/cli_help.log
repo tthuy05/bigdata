@@ -1,0 +1,22 @@
+usage: main.py [-h] [--data DATA] [--auto] [--use-saved-models] [--app-only]
+               [--word-only] [--no-word] [--no-app] [--no-browser]
+               [--open-figs] [--save-baseline]
+               [--sample-fraction SAMPLE_FRACTION] [--port PORT]
+
+Apache Spark PaySim: experiments, saved-model demo, Streamlit and Word.
+
+options:
+  -h, --help            show this help message and exit
+  --data DATA
+  --auto
+  --use-saved-models
+  --app-only
+  --word-only
+  --no-word
+  --no-app
+  --no-browser
+  --open-figs
+  --save-baseline
+  --sample-fraction SAMPLE_FRACTION
+                        mẫu đồng đều từ CSV thật; mặc định toàn bộ
+  --port PORT

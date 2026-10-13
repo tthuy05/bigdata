@@ -1,0 +1,955 @@
+
+==============================================================================
+[1m[96m[ ] BƯỚC 1/3. THỰC NGHIỆM A/B × PHÂN TẦNG/THỜI GIAN[0m
+==============================================================================
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+
+[1m--- 1) Phân bố nhãn isFraud  → Hình fig_label_distribution ------------------[0m
+   Câu lệnh Spark SQL:
+      [96mSELECT isFraud, COUNT(*) AS n,[0m
+      [96mROUND(100 * COUNT(*) / SUM(COUNT(*)) OVER (), 4) AS pct[0m
+      [96mFROM transactions GROUP BY isFraud ORDER BY isFraud[0m
++-------+-------+-------+
+|isFraud|n      |pct    |
++-------+-------+-------+
+|0      |6354407|99.8709|
+|1      |8213   |0.1291 |
++-------+-------+-------+
+
+   => Cứ 1 giao dịch gian lận có khoảng 773 giao dịch bình thường (mất cân bằng nặng)
+
+[1m--- 2) Thống kê theo loại giao dịch  → Bảng 7, Hình fig_type_distribution ---[0m
+   Câu lệnh Spark SQL:
+      [96mSELECT type, COUNT(*) AS n, SUM(isFraud) AS fraud,[0m
+      [96mROUND(100 * AVG(isFraud), 4) AS fraud_rate_pct,[0m
+      [96mROUND(SUM(amount) / 1e9, 2) AS total_amount_billion,[0m
+      [96mROUND(AVG(amount), 2) AS avg_amount[0m
+      [96mFROM transactions GROUP BY type ORDER BY n DESC[0m
++--------+-------+-----+--------------+--------------------+----------+
+|type    |n      |fraud|fraud_rate_pct|total_amount_billion|avg_amount|
++--------+-------+-----+--------------+--------------------+----------+
+|CASH_OUT|2237500|4116 |0.184         |394.41              |176273.96 |
+|PAYMENT |2151495|0    |0.0           |28.09               |13057.6   |
+|CASH_IN |1399284|0    |0.0           |236.37              |168920.24 |
+|TRANSFER|532909 |4097 |0.7688        |485.29              |910647.01 |
+|DEBIT   |41432  |0    |0.0           |0.23                |5483.67   |
++--------+-------+-----+--------------+--------------------+----------+
+
+   => Gian lận CHỈ xuất hiện ở: CASH_OUT, TRANSFER
+
+[1m--- 3) Số tiền theo nhãn  → Bảng 8, Hình fig_amount_distribution ------------[0m
+   Câu lệnh Spark SQL:
+      [96mSELECT isFraud, ROUND(AVG(amount), 2) AS mean,[0m
+      [96mROUND(percentile_approx(amount, 0.5), 2) AS median,[0m
+      [96mROUND(MIN(amount), 2) AS min, ROUND(MAX(amount), 2) AS max,[0m
+      [96mROUND(STDDEV(amount), 2) AS std[0m
+      [96mFROM transactions GROUP BY isFraud ORDER BY isFraud[0m
++-------+---------+---------+----+-------------+----------+
+|isFraud|mean     |median   |min |max          |std       |
++-------+---------+---------+----+-------------+----------+
+|0      |178197.04|74667.05 |0.01|9.244551664E7|596236.98 |
+|1      |1467967.3|440962.56|0.0 |1.0E7        |2404252.95|
++-------+---------+---------+----+-------------+----------+
+
+
+[1m---    Số gian lận đúng hạn mức 10 triệu ------------------------------------[0m
+   Câu lệnh Spark SQL:
+      [96mSELECT COUNT(*) AS n_10M FROM transactions WHERE isFraud = 1 AND amount = 10000000[0m
++-----+
+|n_10M|
++-----+
+|287  |
++-----+
+
+
+[1m--- 4) Theo giờ trong ngày  → Hình fig_fraud_by_hour ------------------------[0m
+   Câu lệnh Spark SQL:
+      [96mSELECT step % 24 AS hour, COUNT(*) AS n, SUM(isFraud) AS fraud,[0m
+      [96mROUND(100 * AVG(isFraud), 4) AS fraud_rate_pct[0m
+      [96mFROM transactions GROUP BY step % 24 ORDER BY hour[0m
++----+------+-----+--------------+
+|hour|n     |fraud|fraud_rate_pct|
++----+------+-----+--------------+
+|0   |71587 |300  |0.4191        |
+|1   |27111 |358  |1.3205        |
+|2   |9018  |372  |4.1251        |
+|3   |2007  |326  |16.2431       |
+|4   |1241  |274  |22.079        |
+|5   |1641  |366  |22.3035       |
+|6   |3420  |358  |10.4678       |
+|7   |8988  |328  |3.6493        |
+|8   |26915 |368  |1.3673        |
+|9   |283518|341  |0.1203        |
+|10  |425729|375  |0.0881        |
+|11  |445992|324  |0.0726        |
+|12  |483418|339  |0.0701        |
+|13  |468474|346  |0.0739        |
+|14  |439653|353  |0.0803        |
+|15  |416686|341  |0.0818        |
+|16  |441612|345  |0.0781        |
+|17  |439941|353  |0.0802        |
+|18  |580509|343  |0.0591        |
+|19  |647814|342  |0.0528        |
+|20  |553728|340  |0.0614        |
+|21  |247806|347  |0.14          |
+|22  |194555|351  |0.1804        |
+|23  |141257|323  |0.2287        |
++----+------+-----+--------------+
+
+   => Tỷ lệ gian lận cao nhất: 5h (22.3035%), 4h (22.079%), 3h (16.2431%)
+
+[1m--- 5) Mẫu số dư (TRANSFER, CASH_OUT)  → Bảng 9, Hình fig_balance_patterns ---[0m
+   Câu lệnh Spark SQL:
+      [96mSELECT isFraud, COUNT(*) AS n,[0m
+      [96mROUND(100*AVG(origZeroBalance),2) AS pct_orig_zero,[0m
+      [96mROUND(100*AVG(destZeroBalance),2) AS pct_dest_zero,[0m
+      [96mROUND(100*AVG(origEmptied),2) AS pct_orig_emptied,[0m
+      [96mROUND(100*AVG(CASE WHEN abs(errorBalanceOrig) > 0.01 THEN 1 ELSE 0 END),2) AS pct_err_orig,[0m
+      [96mROUND(100*AVG(CASE WHEN abs(errorBalanceDest) > 0.01 THEN 1 ELSE 0 END),2) AS pct_err_dest[0m
+      [96mFROM rel GROUP BY isFraud ORDER BY isFraud[0m
++-------+-------+-------------+-------------+----------------+------------+------------+
+|isFraud|n      |pct_orig_zero|pct_dest_zero|pct_orig_emptied|pct_err_orig|pct_err_dest|
++-------+-------+-------------+-------------+----------------+------------+------------+
+|0      |2762196|47.37        |0.06         |0.0             |90.58       |22.58       |
+|1      |8213   |0.5          |49.63        |97.63           |0.55        |56.5        |
++-------+-------+-------------+-------------+----------------+------------+------------+
+
+
+[1m--- 6) Luật có sẵn isFlaggedFraud -------------------------------------------[0m
+   Câu lệnh Spark SQL:
+      [96mSELECT isFraud, isFlaggedFraud, COUNT(*) AS n FROM transactions[0m
+      [96mGROUP BY isFraud, isFlaggedFraud ORDER BY isFraud, isFlaggedFraud[0m
++-------+--------------+-------+
+|isFraud|isFlaggedFraud|n      |
++-------+--------------+-------+
+|0      |0             |6354407|
+|1      |0             |8197   |
+|1      |1             |16     |
++-------+--------------+-------+
+
+   => Luật chỉ gắn cờ 16 giao dịch
+
+[1m--- 7) Thông tin chung ------------------------------------------------------[0m
+   Câu lệnh Spark SQL:
+      [96mSELECT COUNT(DISTINCT nameOrig) AS orig, COUNT(DISTINCT nameDest) AS dest,[0m
+      [96mMIN(step) AS min_step, MAX(step) AS max_step FROM transactions[0m
++-------+-------+--------+--------+
+|orig   |dest   |min_step|max_step|
++-------+-------+--------+--------+
+|6353307|2722362|1       |743     |
++-------+-------+--------+--------+
+
+   Số giao dịch TRANSFER + CASH_OUT        : 2.770.409
+
+[1m--- 8) Lấy mẫu cho histogram và ma trận tương quan  → Hình fig_amount_distribution, fig_correlation ---[0m
+   Mẫu = TOÀN BỘ giao dịch gian lận + 1% giao dịch bình thường (TRANSFER, CASH_OUT), seed = 42
+   Kích thước mẫu                          : 35.971
+   Tương quan Pearson của từng biến với nhãn isFraud (trên mẫu):
+   +------------------+---------------+
+   | Biến             | corr(isFraud) |
+   +------------------+---------------+
+   | origEmptied      |        0,9846 |
+   | destZeroBalance  |        0,6556 |
+   | oldbalanceOrg    |        0,3689 |
+   | amount           |        0,3365 |
+   | errorBalanceDest |        0,2952 |
+   | errorBalanceOrig |       -0,1533 |
+   | oldbalanceDest   |       -0,1157 |
+   | newbalanceOrig   |        0,0782 |
+   | newbalanceDest   |       -0,0693 |
+   +------------------+---------------+
+Matplotlib is building the font cache; this may take a moment.
+
+[1m--- Hình phân tích dữ liệu (EDA) --------------------------------------------[0m
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\figures\fig_label_distribution.png
+      Số liệu lấy từ : eda_stats.json → label (bước 6, bảng 1)
+      Giá trị trên hình: bình thường = 6.354.407, gian lận = 8.213
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\figures\fig_type_distribution.png
+      Số liệu lấy từ : eda_stats.json → by_type (bước 6, bảng 2)
+      Giá trị trên hình: CASH_OUT: 2.237.500 GD / 4.116 GL; PAYMENT: 2.151.495 GD / 0 GL; CASH_IN: 1.399.284 GD / 0 GL; TRANSFER: 532.909 GD / 4.097 GL; DEBIT: 41.432 GD / 0 GL
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\figures\fig_amount_distribution.png
+      Số liệu lấy từ : mẫu ở bước 6 mục 8 (toàn bộ gian lận + 1% bình thường)
+      Giá trị trên hình: 35.971 giao dịch mẫu; đỉnh đỏ ở 7 = gian lận 10.000.000
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\figures\fig_fraud_by_hour.png
+      Số liệu lấy từ : eda_stats.json → by_hour (bước 6, bảng 4)
+      Giá trị trên hình: đỉnh đường đỏ: 5h = 22.3035%, 4h = 22.079%, 3h = 16.2431%
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\figures\fig_balance_patterns.png
+      Số liệu lấy từ : eda_stats.json → balance_patterns (bước 6, bảng 5)
+      Giá trị trên hình: Nguồn 0→0: 47.37% / 0.5%; Đích 0→0: 0.06% / 49.63%; Rút sạch nguồn: 0.0% / 97.63%; Lệch số dư đích: 22.58% / 56.5%
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\figures\fig_correlation.png
+      Số liệu lấy từ : mẫu ở bước 6 mục 8
+      Giá trị trên hình: hàng cuối = bảng corr(isFraud) ở bước 6
+
+[1m--- THÍ NGHIỆM A_stratified: post_transaction -------------------------------[0m
+   +------------------+--------------+-------------+---------+
+   | Tập              | Số giao dịch | Số gian lận | Tỷ lệ % |
+   +------------------+--------------+-------------+---------+
+   | Huấn luyện (70%) |      193.919 |         553 |  0,2852 |
+   | Kiểm định (10%)  |       27.511 |          89 |  0,3235 |
+   | Kiểm thử (20%)   |       55.172 |         160 |  0,2900 |
+   +------------------+--------------+-------------+---------+
+   Trọng số lớp (w_c = N / (2·N_c)): gian lận = 175.33, bình thường = 0.5014
+
+[1m--- Mô hình 1/4: Logistic Regression ----------------------------------------[0m
+   Pipeline: StringIndexer -> OneHotEncoder -> VectorAssembler -> StandardScaler -> LogisticRegression
+   Huấn luyện xong trong 32.1s, đã lưu: outputs\experiments\20261013T052452Z_6331e780\A_stratified\models\logistic_regression
+   Ngưỡng tối ưu F1 trên tập kiểm định: t* = 0.9785
+
+[1m--- Mô hình 2/4: Decision Tree ----------------------------------------------[0m
+   Pipeline: StringIndexer -> OneHotEncoder -> VectorAssembler -> DecisionTreeClassifier
+   Huấn luyện xong trong 10.2s, đã lưu: outputs\experiments\20261013T052452Z_6331e780\A_stratified\models\decision_tree
+   Ngưỡng tối ưu F1 trên tập kiểm định: t* = 0.9957
+
+[1m--- Mô hình 3/4: Random Forest ----------------------------------------------[0m
+   Pipeline: StringIndexer -> OneHotEncoder -> VectorAssembler -> RandomForestClassifier
+   Huấn luyện xong trong 27.6s, đã lưu: outputs\experiments\20261013T052452Z_6331e780\A_stratified\models\random_forest
+   Ngưỡng tối ưu F1 trên tập kiểm định: t* = 0.4800
+
+[1m--- Mô hình 4/4: GBT --------------------------------------------------------[0m
+   Pipeline: StringIndexer -> OneHotEncoder -> VectorAssembler -> GBTClassifier
+   Huấn luyện xong trong 183.5s, đã lưu: outputs\experiments\20261013T052452Z_6331e780\A_stratified\models\gbt
+   Ngưỡng tối ưu F1 trên tập kiểm định: t* = 0.9785
+   Đã cố định mô hình từ Validation trước đánh giá Test: Decision Tree
+   Ma trận nhầm lẫn của Logistic Regression trên tập kiểm thử:
+   +-------------------------+-----------+-----------+
+   | Thực tế \ Dự đoán       | Dự đoán 0 | Dự đoán 1 |
+   +-------------------------+-----------+-----------+
+   | Thực tế 0 (bình thường) |    55.012 |         0 |
+   | Thực tế 1 (gian lận)    |         6 |       154 |
+   +-------------------------+-----------+-----------+
+   +-----------+---------+
+   | Chỉ số    | Giá trị |
+   +-----------+---------+
+   | Precision |  1,0000 |
+   | Recall    |  0,9625 |
+   | F1-score  |  0,9809 |
+   | AUC-ROC   |  0,9969 |
+   | AUC-PR    |  0,9931 |
+   +-----------+---------+
+   Ma trận nhầm lẫn của Decision Tree trên tập kiểm thử:
+   +-------------------------+-----------+-----------+
+   | Thực tế \ Dự đoán       | Dự đoán 0 | Dự đoán 1 |
+   +-------------------------+-----------+-----------+
+   | Thực tế 0 (bình thường) |    55.012 |         0 |
+   | Thực tế 1 (gian lận)    |         1 |       159 |
+   +-------------------------+-----------+-----------+
+   +-----------+---------+
+   | Chỉ số    | Giá trị |
+   +-----------+---------+
+   | Precision |  1,0000 |
+   | Recall    |  0,9938 |
+   | F1-score  |  0,9969 |
+   | AUC-ROC   |  0,9969 |
+   | AUC-PR    |  0,9963 |
+   +-----------+---------+
+   Ma trận nhầm lẫn của Random Forest trên tập kiểm thử:
+   +-------------------------+-----------+-----------+
+   | Thực tế \ Dự đoán       | Dự đoán 0 | Dự đoán 1 |
+   +-------------------------+-----------+-----------+
+   | Thực tế 0 (bình thường) |    55.012 |         0 |
+   | Thực tế 1 (gian lận)    |         2 |       158 |
+   +-------------------------+-----------+-----------+
+   +-----------+---------+
+   | Chỉ số    | Giá trị |
+   +-----------+---------+
+   | Precision |  1,0000 |
+   | Recall    |  0,9875 |
+   | F1-score  |  0,9937 |
+   | AUC-ROC   |  0,9965 |
+   | AUC-PR    |  0,9937 |
+   +-----------+---------+
+   Ma trận nhầm lẫn của GBT trên tập kiểm thử:
+   +-------------------------+-----------+-----------+
+   | Thực tế \ Dự đoán       | Dự đoán 0 | Dự đoán 1 |
+   +-------------------------+-----------+-----------+
+   | Thực tế 0 (bình thường) |    55.012 |         0 |
+   | Thực tế 1 (gian lận)    |         2 |       158 |
+   +-------------------------+-----------+-----------+
+   +-----------+---------+
+   | Chỉ số    | Giá trị |
+   +-----------+---------+
+   | Precision |  1,0000 |
+   | Recall    |  0,9875 |
+   | F1-score  |  0,9937 |
+   | AUC-ROC   |  0,9936 |
+   | AUC-PR    |  0,9876 |
+   +-----------+---------+
+
+[1m--- Bảng so sánh 4 mô hình trên tập kiểm thử (dữ liệu của Bảng 13) ----------[0m
+   +---------------------+--------+-----------+--------+--------+---------+--------+
+   | Mô hình             |     t* | Precision | Recall |     F1 | AUC-ROC | AUC-PR |
+   +---------------------+--------+-----------+--------+--------+---------+--------+
+   | Logistic Regression | 0,9790 |    1,0000 | 0,9625 | 0,9809 |  0,9969 | 0,9931 |
+   | Decision Tree       | 0,9960 |    1,0000 | 0,9938 | 0,9969 |  0,9969 | 0,9963 |
+   | Random Forest       | 0,4800 |    1,0000 | 0,9875 | 0,9937 |  0,9965 | 0,9937 |
+   | GBT                 | 0,9780 |    1,0000 | 0,9875 | 0,9937 |  0,9936 | 0,9876 |
+   | Luật isFlaggedFraud |      - |    0,0000 | 0,0000 | 0,0000 |       - |      - |
+   +---------------------+--------+-----------+--------+--------+---------+--------+
+
+[1m--- Ma trận nhầm lẫn 4 mô hình (dữ liệu của Bảng 14) ------------------------[0m
+   +---------------------+-----+----+----+--------+-------------+----------+
+   | Mô hình             |  TP | FP | FN |     TN | Specificity | Accuracy |
+   +---------------------+-----+----+----+--------+-------------+----------+
+   | Logistic Regression | 154 |  0 |  6 | 55.012 |      1,0000 |   0,9999 |
+   | Decision Tree       | 159 |  0 |  1 | 55.012 |      1,0000 |   1,0000 |
+   | Random Forest       | 158 |  0 |  2 | 55.012 |      1,0000 |   1,0000 |
+   | GBT                 | 158 |  0 |  2 | 55.012 |      1,0000 |   1,0000 |
+   +---------------------+-----+----+----+--------+-------------+----------+
+
+[1m--- Ngưỡng 0,5 so với t* (dữ liệu của Bảng 15) ------------------------------[0m
+   +---------------------+--------+----+----+-----------+--------+--------+
+   | Mô hình             | Ngưỡng | FP | FN | Precision | Recall |     F1 |
+   +---------------------+--------+----+----+-----------+--------+--------+
+   | Logistic Regression |    0.5 | 37 |  1 |    0,8112 | 0,9938 | 0,8933 |
+   |                     |  0.979 |  0 |  6 |    1,0000 | 0,9625 | 0,9809 |
+   | Decision Tree       |    0.5 | 40 |  1 |    0,7990 | 0,9938 | 0,8858 |
+   |                     |  0.996 |  0 |  1 |    1,0000 | 0,9938 | 0,9969 |
+   | Random Forest       |    0.5 |  0 |  2 |    1,0000 | 0,9875 | 0,9937 |
+   |                     |  0.480 |  0 |  2 |    1,0000 | 0,9875 | 0,9937 |
+   | GBT                 |    0.5 |  2 |  2 |    0,9875 | 0,9875 | 0,9875 |
+   |                     |  0.978 |  0 |  2 |    1,0000 | 0,9875 | 0,9937 |
+   +---------------------+--------+----+----+-----------+--------+--------+
+
+[1m--- Thời gian (dữ liệu của Bảng 16) – dao động giữa các lần chạy, KHÔNG đưa vào đối chiếu ---[0m
+   +---------------------+----------------+------------------+
+   | Mô hình             | Huấn luyện (s) | Dự đoán test (s) |
+   +---------------------+----------------+------------------+
+   | Logistic Regression |        32,1000 |           2,0570 |
+   | Decision Tree       |        10,2000 |           2,3970 |
+   | Random Forest       |        27,6000 |           2,5380 |
+   | GBT                 |       183,5000 |           2,3530 |
+   +---------------------+----------------+------------------+
+
+[1m--- Độ quan trọng đặc trưng – Decision Tree ---------------------------------[0m
+   +------+-----------------------+---------------+
+   | Hạng |             Đặc trưng | Độ quan trọng |
+   +------+-----------------------+---------------+
+   | 1    |           origEmptied |        0,9382 |
+   | 2    | slog_errorBalanceDest |        0,0453 |
+   | 3    |            log_amount |        0,0071 |
+   | 4    |     log_oldbalanceOrg |        0,0029 |
+   | 5    |    log_oldbalanceDest |        0,0022 |
+   | 6    |    log_newbalanceDest |        0,0019 |
+   | 7    |                  hour |        0,0014 |
+   | 8    | slog_errorBalanceOrig |        0,0010 |
+   | 9    |         type_CASH_OUT |        0,0000 |
+   | 10   |    log_newbalanceOrig |        0,0000 |
+   | 11   |       origZeroBalance |        0,0000 |
+   | 12   |       destZeroBalance |        0,0000 |
+   +------+-----------------------+---------------+
+
+[1m--- Hệ số Logistic Regression (đã chuẩn hóa; dương = làm tăng khả năng gian lận) ---[0m
+   +-----------------------+---------+
+   | Đặc trưng             |   Hệ số |
+   +-----------------------+---------+
+   | slog_errorBalanceOrig | -1,5247 |
+   | log_newbalanceOrig    | -1,0517 |
+   | origZeroBalance       |  0,9243 |
+   | log_oldbalanceDest    | -0,5572 |
+   | log_oldbalanceOrg     |  0,5399 |
+   | hour                  | -0,4416 |
+   | slog_errorBalanceDest |  0,3837 |
+   | origEmptied           |  0,2957 |
+   | destZeroBalance       |  0,1598 |
+   | type_CASH_OUT         | -0,1311 |
+   | log_newbalanceDest    | -0,0678 |
+   | log_amount            | -0,0417 |
+   +-----------------------+---------+
+
+[1m--- Chọn mô hình tốt nhất ---------------------------------------------------[0m
+   Tiêu chí trên VALIDATION: AUC-PR cao nhất, sau đó F1, Precision; không làm tròn khi chọn
+   [92m✔ MÔ HÌNH ĐƯỢC CHỌN: Decision Tree; ngưỡng t* = 0.995729[0m
+
+[1m--- Hình kết quả mô hình ----------------------------------------------------[0m
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\A_stratified\figures\fig_metrics_comparison.png
+      Số liệu lấy từ : model_results.json → results (bảng so sánh ở bước 10)
+      Giá trị trên hình: chiều cao cột = Precision, Recall, F1, AUC-PR của từng mô hình
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\A_stratified\figures\fig_confusion_matrices.png
+      Số liệu lấy từ : model_results.json → TP/FP/FN/TN (bảng ở bước 10)
+      Giá trị trên hình: Logistic Regression: FP=0 FN=6; Decision Tree: FP=0 FN=1; Random Forest: FP=0 FN=2; GBT: FP=0 FN=2
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\A_stratified\figures\fig_roc_curves.png
+      Số liệu lấy từ : xác suất dự đoán của 4 mô hình trên tập kiểm thử (bước 9)
+      Giá trị trên hình: diện tích ROC: Logistic Regression: 0.9969, Decision Tree: 0.9969, Random Forest: 0.9965, GBT: 0.9936
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\A_stratified\figures\fig_pr_curves.png
+      Số liệu lấy từ : xác suất dự đoán của 4 mô hình trên tập kiểm thử (bước 9)
+      Giá trị trên hình: vẽ từ (xác suất dự đoán, nhãn thật) của toàn bộ tập kiểm thử
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\A_stratified\figures\fig_feature_importance.png
+      Số liệu lấy từ : model_results.json → feature_importance (bước 10)
+      Giá trị trên hình: top 3: origEmptied = 0.938, slog_errorBalanceDest = 0.045, log_amount = 0.007
+
+[1m--- THÍ NGHIỆM B_stratified: pre_transaction --------------------------------[0m
+   +------------------+--------------+-------------+---------+
+   | Tập              | Số giao dịch | Số gian lận | Tỷ lệ % |
+   +------------------+--------------+-------------+---------+
+   | Huấn luyện (70%) |      193.919 |         553 |  0,2852 |
+   | Kiểm định (10%)  |       27.511 |          89 |  0,3235 |
+   | Kiểm thử (20%)   |       55.172 |         160 |  0,2900 |
+   +------------------+--------------+-------------+---------+
+   Trọng số lớp (w_c = N / (2·N_c)): gian lận = 175.33, bình thường = 0.5014
+
+[1m--- Mô hình 1/4: Logistic Regression ----------------------------------------[0m
+   Pipeline: StringIndexer -> OneHotEncoder -> VectorAssembler -> StandardScaler -> LogisticRegression
+   Huấn luyện xong trong 6.9s, đã lưu: outputs\experiments\20261013T052452Z_6331e780\B_stratified\models\logistic_regression
+   Ngưỡng tối ưu F1 trên tập kiểm định: t* = 0.8878
+
+[1m--- Mô hình 2/4: Decision Tree ----------------------------------------------[0m
+   Pipeline: StringIndexer -> OneHotEncoder -> VectorAssembler -> DecisionTreeClassifier
+   Huấn luyện xong trong 10.4s, đã lưu: outputs\experiments\20261013T052452Z_6331e780\B_stratified\models\decision_tree
+   Ngưỡng tối ưu F1 trên tập kiểm định: t* = 0.9875
+
+[1m--- Mô hình 3/4: Random Forest ----------------------------------------------[0m
+   Pipeline: StringIndexer -> OneHotEncoder -> VectorAssembler -> RandomForestClassifier
+   Huấn luyện xong trong 42.5s, đã lưu: outputs\experiments\20261013T052452Z_6331e780\B_stratified\models\random_forest
+   Ngưỡng tối ưu F1 trên tập kiểm định: t* = 0.9314
+
+[1m--- Mô hình 4/4: GBT --------------------------------------------------------[0m
+   Pipeline: StringIndexer -> OneHotEncoder -> VectorAssembler -> GBTClassifier
+   Huấn luyện xong trong 221.0s, đã lưu: outputs\experiments\20261013T052452Z_6331e780\B_stratified\models\gbt
+   Ngưỡng tối ưu F1 trên tập kiểm định: t* = 0.9701
+   Đã cố định mô hình từ Validation trước đánh giá Test: GBT
+   Ma trận nhầm lẫn của Logistic Regression trên tập kiểm thử:
+   +-------------------------+-----------+-----------+
+   | Thực tế \ Dự đoán       | Dự đoán 0 | Dự đoán 1 |
+   +-------------------------+-----------+-----------+
+   | Thực tế 0 (bình thường) |    54.821 |       191 |
+   | Thực tế 1 (gian lận)    |       145 |        15 |
+   +-------------------------+-----------+-----------+
+   +-----------+---------+
+   | Chỉ số    | Giá trị |
+   +-----------+---------+
+   | Precision |  0,0728 |
+   | Recall    |  0,0938 |
+   | F1-score  |  0,0820 |
+   | AUC-ROC   |  0,7817 |
+   | AUC-PR    |  0,0201 |
+   +-----------+---------+
+   Ma trận nhầm lẫn của Decision Tree trên tập kiểm thử:
+   +-------------------------+-----------+-----------+
+   | Thực tế \ Dự đoán       | Dự đoán 0 | Dự đoán 1 |
+   +-------------------------+-----------+-----------+
+   | Thực tế 0 (bình thường) |    54.941 |        71 |
+   | Thực tế 1 (gian lận)    |       104 |        56 |
+   +-------------------------+-----------+-----------+
+   +-----------+---------+
+   | Chỉ số    | Giá trị |
+   +-----------+---------+
+   | Precision |  0,4409 |
+   | Recall    |  0,3500 |
+   | F1-score  |  0,3902 |
+   | AUC-ROC   |  0,7234 |
+   | AUC-PR    |  0,3025 |
+   +-----------+---------+
+   Ma trận nhầm lẫn của Random Forest trên tập kiểm thử:
+   +-------------------------+-----------+-----------+
+   | Thực tế \ Dự đoán       | Dự đoán 0 | Dự đoán 1 |
+   +-------------------------+-----------+-----------+
+   | Thực tế 0 (bình thường) |    54.999 |        13 |
+   | Thực tế 1 (gian lận)    |       131 |        29 |
+   +-------------------------+-----------+-----------+
+   +-----------+---------+
+   | Chỉ số    | Giá trị |
+   +-----------+---------+
+   | Precision |  0,6905 |
+   | Recall    |  0,1812 |
+   | F1-score  |  0,2871 |
+   | AUC-ROC   |  0,8307 |
+   | AUC-PR    |  0,2356 |
+   +-----------+---------+
+   Ma trận nhầm lẫn của GBT trên tập kiểm thử:
+   +-------------------------+-----------+-----------+
+   | Thực tế \ Dự đoán       | Dự đoán 0 | Dự đoán 1 |
+   +-------------------------+-----------+-----------+
+   | Thực tế 0 (bình thường) |    54.984 |        28 |
+   | Thực tế 1 (gian lận)    |       117 |        43 |
+   +-------------------------+-----------+-----------+
+   +-----------+---------+
+   | Chỉ số    | Giá trị |
+   +-----------+---------+
+   | Precision |  0,6056 |
+   | Recall    |  0,2687 |
+   | F1-score  |  0,3723 |
+   | AUC-ROC   |  0,8348 |
+   | AUC-PR    |  0,2864 |
+   +-----------+---------+
+
+[1m--- Bảng so sánh 4 mô hình trên tập kiểm thử (dữ liệu của Bảng 13) ----------[0m
+   +---------------------+--------+-----------+--------+--------+---------+--------+
+   | Mô hình             |     t* | Precision | Recall |     F1 | AUC-ROC | AUC-PR |
+   +---------------------+--------+-----------+--------+--------+---------+--------+
+   | Logistic Regression | 0,8880 |    0,0728 | 0,0938 | 0,0820 |  0,7817 | 0,0201 |
+   | Decision Tree       | 0,9870 |    0,4409 | 0,3500 | 0,3902 |  0,7234 | 0,3025 |
+   | Random Forest       | 0,9310 |    0,6905 | 0,1812 | 0,2871 |  0,8307 | 0,2356 |
+   | GBT                 | 0,9700 |    0,6056 | 0,2687 | 0,3723 |  0,8348 | 0,2864 |
+   | Luật isFlaggedFraud |      - |    0,0000 | 0,0000 | 0,0000 |       - |      - |
+   +---------------------+--------+-----------+--------+--------+---------+--------+
+
+[1m--- Ma trận nhầm lẫn 4 mô hình (dữ liệu của Bảng 14) ------------------------[0m
+   +---------------------+----+-----+-----+--------+-------------+----------+
+   | Mô hình             | TP |  FP |  FN |     TN | Specificity | Accuracy |
+   +---------------------+----+-----+-----+--------+-------------+----------+
+   | Logistic Regression | 15 | 191 | 145 | 54.821 |      0,9965 |   0,9939 |
+   | Decision Tree       | 56 |  71 | 104 | 54.941 |      0,9987 |   0,9968 |
+   | Random Forest       | 29 |  13 | 131 | 54.999 |      0,9998 |   0,9974 |
+   | GBT                 | 43 |  28 | 117 | 54.984 |      0,9995 |   0,9974 |
+   +---------------------+----+-----+-----+--------+-------------+----------+
+
+[1m--- Ngưỡng 0,5 so với t* (dữ liệu của Bảng 15) ------------------------------[0m
+   +---------------------+--------+--------+-----+-----------+--------+--------+
+   | Mô hình             | Ngưỡng |     FP |  FN | Precision | Recall |     F1 |
+   +---------------------+--------+--------+-----+-----------+--------+--------+
+   | Logistic Regression |    0.5 | 11.693 |  52 |    0,0092 | 0,6750 | 0,0181 |
+   |                     |  0.888 |    191 | 145 |    0,0728 | 0,0938 | 0,0820 |
+   | Decision Tree       |    0.5 |  6.705 |  64 |    0,0141 | 0,6000 | 0,0276 |
+   |                     |  0.987 |     71 | 104 |    0,4409 | 0,3500 | 0,3902 |
+   | Random Forest       |    0.5 |  3.593 |  79 |    0,0220 | 0,5062 | 0,0423 |
+   |                     |  0.931 |     13 | 131 |    0,6905 | 0,1812 | 0,2871 |
+   | GBT                 |    0.5 |  6.448 |  53 |    0,0163 | 0,6687 | 0,0319 |
+   |                     |  0.970 |     28 | 117 |    0,6056 | 0,2687 | 0,3723 |
+   +---------------------+--------+--------+-----+-----------+--------+--------+
+
+[1m--- Thời gian (dữ liệu của Bảng 16) – dao động giữa các lần chạy, KHÔNG đưa vào đối chiếu ---[0m
+   +---------------------+----------------+------------------+
+   | Mô hình             | Huấn luyện (s) | Dự đoán test (s) |
+   +---------------------+----------------+------------------+
+   | Logistic Regression |         6,9000 |           1,9250 |
+   | Decision Tree       |        10,4000 |           1,6200 |
+   | Random Forest       |        42,5000 |           3,0760 |
+   | GBT                 |       221,0000 |           2,1640 |
+   +---------------------+----------------+------------------+
+
+[1m--- Độ quan trọng đặc trưng – GBT -------------------------------------------[0m
+   +------+---------------+---------------+
+   | Hạng |     Đặc trưng | Độ quan trọng |
+   +------+---------------+---------------+
+   | 1    |    log_amount |        0,4431 |
+   | 2    |          hour |        0,4420 |
+   | 3    | type_CASH_OUT |        0,1149 |
+   +------+---------------+---------------+
+
+[1m--- Hệ số Logistic Regression (đã chuẩn hóa; dương = làm tăng khả năng gian lận) ---[0m
+   +---------------+---------+
+   | Đặc trưng     |   Hệ số |
+   +---------------+---------+
+   | type_CASH_OUT | -0,5127 |
+   | log_amount    |  0,3973 |
+   | hour          | -0,3756 |
+   +---------------+---------+
+
+[1m--- Chọn mô hình tốt nhất ---------------------------------------------------[0m
+   Tiêu chí trên VALIDATION: AUC-PR cao nhất, sau đó F1, Precision; không làm tròn khi chọn
+   [92m✔ MÔ HÌNH ĐƯỢC CHỌN: GBT; ngưỡng t* = 0.970066[0m
+
+[1m--- Hình kết quả mô hình ----------------------------------------------------[0m
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\B_stratified\figures\fig_metrics_comparison.png
+      Số liệu lấy từ : model_results.json → results (bảng so sánh ở bước 10)
+      Giá trị trên hình: chiều cao cột = Precision, Recall, F1, AUC-PR của từng mô hình
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\B_stratified\figures\fig_confusion_matrices.png
+      Số liệu lấy từ : model_results.json → TP/FP/FN/TN (bảng ở bước 10)
+      Giá trị trên hình: Logistic Regression: FP=191 FN=145; Decision Tree: FP=71 FN=104; Random Forest: FP=13 FN=131; GBT: FP=28 FN=117
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\B_stratified\figures\fig_roc_curves.png
+      Số liệu lấy từ : xác suất dự đoán của 4 mô hình trên tập kiểm thử (bước 9)
+      Giá trị trên hình: diện tích ROC: Logistic Regression: 0.7817, Decision Tree: 0.7234, Random Forest: 0.8307, GBT: 0.8348
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\B_stratified\figures\fig_pr_curves.png
+      Số liệu lấy từ : xác suất dự đoán của 4 mô hình trên tập kiểm thử (bước 9)
+      Giá trị trên hình: vẽ từ (xác suất dự đoán, nhãn thật) của toàn bộ tập kiểm thử
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\B_stratified\figures\fig_feature_importance.png
+      Số liệu lấy từ : model_results.json → feature_importance (bước 10)
+      Giá trị trên hình: top 3: log_amount = 0.443, hour = 0.442, type_CASH_OUT = 0.115
+
+[1m--- THÍ NGHIỆM A_temporal: post_transaction ---------------------------------[0m
+   +------------------+--------------+-------------+---------+
+   | Tập              | Số giao dịch | Số gian lận | Tỷ lệ % |
+   +------------------+--------------+-------------+---------+
+   | Huấn luyện (70%) |      193.250 |         358 |  0,1853 |
+   | Kiểm định (10%)  |       27.870 |          27 |  0,0969 |
+   | Kiểm thử (20%)   |       55.482 |         417 |  0,7516 |
+   +------------------+--------------+-------------+---------+
+   Trọng số lớp (w_c = N / (2·N_c)): gian lận = 269.90, bình thường = 0.5009
+
+[1m--- Mô hình 1/4: Logistic Regression ----------------------------------------[0m
+   Pipeline: StringIndexer -> OneHotEncoder -> VectorAssembler -> StandardScaler -> LogisticRegression
+   Huấn luyện xong trong 6.3s, đã lưu: outputs\experiments\20261013T052452Z_6331e780\A_temporal\models\logistic_regression
+   Ngưỡng tối ưu F1 trên tập kiểm định: t* = 0.9673
+
+[1m--- Mô hình 2/4: Decision Tree ----------------------------------------------[0m
+   Pipeline: StringIndexer -> OneHotEncoder -> VectorAssembler -> DecisionTreeClassifier
+   Huấn luyện xong trong 3.1s, đã lưu: outputs\experiments\20261013T052452Z_6331e780\A_temporal\models\decision_tree
+   Ngưỡng tối ưu F1 trên tập kiểm định: t* = 1.0000
+
+[1m--- Mô hình 3/4: Random Forest ----------------------------------------------[0m
+   Pipeline: StringIndexer -> OneHotEncoder -> VectorAssembler -> RandomForestClassifier
+   Huấn luyện xong trong 12.6s, đã lưu: outputs\experiments\20261013T052452Z_6331e780\A_temporal\models\random_forest
+   Ngưỡng tối ưu F1 trên tập kiểm định: t* = 0.9600
+
+[1m--- Mô hình 4/4: GBT --------------------------------------------------------[0m
+   Pipeline: StringIndexer -> OneHotEncoder -> VectorAssembler -> GBTClassifier
+   Huấn luyện xong trong 51.8s, đã lưu: outputs\experiments\20261013T052452Z_6331e780\A_temporal\models\gbt
+   Ngưỡng tối ưu F1 trên tập kiểm định: t* = 0.9785
+   Đã cố định mô hình từ Validation trước đánh giá Test: Decision Tree
+   Ma trận nhầm lẫn của Logistic Regression trên tập kiểm thử:
+   +-------------------------+-----------+-----------+
+   | Thực tế \ Dự đoán       | Dự đoán 0 | Dự đoán 1 |
+   +-------------------------+-----------+-----------+
+   | Thực tế 0 (bình thường) |    55.065 |         0 |
+   | Thực tế 1 (gian lận)    |        19 |       398 |
+   +-------------------------+-----------+-----------+
+   +-----------+---------+
+   | Chỉ số    | Giá trị |
+   +-----------+---------+
+   | Precision |  1,0000 |
+   | Recall    |  0,9544 |
+   | F1-score  |  0,9767 |
+   | AUC-ROC   |  0,9929 |
+   | AUC-PR    |  0,9912 |
+   +-----------+---------+
+   Ma trận nhầm lẫn của Decision Tree trên tập kiểm thử:
+   +-------------------------+-----------+-----------+
+   | Thực tế \ Dự đoán       | Dự đoán 0 | Dự đoán 1 |
+   +-------------------------+-----------+-----------+
+   | Thực tế 0 (bình thường) |    55.065 |         0 |
+   | Thực tế 1 (gian lận)    |        15 |       402 |
+   +-------------------------+-----------+-----------+
+   +-----------+---------+
+   | Chỉ số    | Giá trị |
+   +-----------+---------+
+   | Precision |  1,0000 |
+   | Recall    |  0,9640 |
+   | F1-score  |  0,9817 |
+   | AUC-ROC   |  0,9952 |
+   | AUC-PR    |  0,9948 |
+   +-----------+---------+
+   Ma trận nhầm lẫn của Random Forest trên tập kiểm thử:
+   +-------------------------+-----------+-----------+
+   | Thực tế \ Dự đoán       | Dự đoán 0 | Dự đoán 1 |
+   +-------------------------+-----------+-----------+
+   | Thực tế 0 (bình thường) |    55.065 |         0 |
+   | Thực tế 1 (gian lận)    |         5 |       412 |
+   +-------------------------+-----------+-----------+
+   +-----------+---------+
+   | Chỉ số    | Giá trị |
+   +-----------+---------+
+   | Precision |  1,0000 |
+   | Recall    |  0,9880 |
+   | F1-score  |  0,9940 |
+   | AUC-ROC   |  1,0000 |
+   | AUC-PR    |  0,9999 |
+   +-----------+---------+
+   Ma trận nhầm lẫn của GBT trên tập kiểm thử:
+   +-------------------------+-----------+-----------+
+   | Thực tế \ Dự đoán       | Dự đoán 0 | Dự đoán 1 |
+   +-------------------------+-----------+-----------+
+   | Thực tế 0 (bình thường) |    55.065 |         0 |
+   | Thực tế 1 (gian lận)    |         4 |       413 |
+   +-------------------------+-----------+-----------+
+   +-----------+---------+
+   | Chỉ số    | Giá trị |
+   +-----------+---------+
+   | Precision |  1,0000 |
+   | Recall    |  0,9904 |
+   | F1-score  |  0,9952 |
+   | AUC-ROC   |  0,9989 |
+   | AUC-PR    |  0,9912 |
+   +-----------+---------+
+
+[1m--- Bảng so sánh 4 mô hình trên tập kiểm thử (dữ liệu của Bảng 13) ----------[0m
+   +---------------------+--------+-----------+--------+--------+---------+--------+
+   | Mô hình             |     t* | Precision | Recall |     F1 | AUC-ROC | AUC-PR |
+   +---------------------+--------+-----------+--------+--------+---------+--------+
+   | Logistic Regression | 0,9670 |    1,0000 | 0,9544 | 0,9767 |  0,9929 | 0,9912 |
+   | Decision Tree       | 1,0000 |    1,0000 | 0,9640 | 0,9817 |  0,9952 | 0,9948 |
+   | Random Forest       | 0,9600 |    1,0000 | 0,9880 | 0,9940 |  1,0000 | 0,9999 |
+   | GBT                 | 0,9780 |    1,0000 | 0,9904 | 0,9952 |  0,9989 | 0,9912 |
+   | Luật isFlaggedFraud |      - |    0,0000 | 0,0000 | 0,0000 |       - |      - |
+   +---------------------+--------+-----------+--------+--------+---------+--------+
+
+[1m--- Ma trận nhầm lẫn 4 mô hình (dữ liệu của Bảng 14) ------------------------[0m
+   +---------------------+-----+----+----+--------+-------------+----------+
+   | Mô hình             |  TP | FP | FN |     TN | Specificity | Accuracy |
+   +---------------------+-----+----+----+--------+-------------+----------+
+   | Logistic Regression | 398 |  0 | 19 | 55.065 |      1,0000 |   0,9997 |
+   | Decision Tree       | 402 |  0 | 15 | 55.065 |      1,0000 |   0,9997 |
+   | Random Forest       | 412 |  0 |  5 | 55.065 |      1,0000 |   0,9999 |
+   | GBT                 | 413 |  0 |  4 | 55.065 |      1,0000 |   0,9999 |
+   +---------------------+-----+----+----+--------+-------------+----------+
+
+[1m--- Ngưỡng 0,5 so với t* (dữ liệu của Bảng 15) ------------------------------[0m
+   +---------------------+--------+----+----+-----------+--------+--------+
+   | Mô hình             | Ngưỡng | FP | FN | Precision | Recall |     F1 |
+   +---------------------+--------+----+----+-----------+--------+--------+
+   | Logistic Regression |    0.5 |  1 |  4 |    0,9976 | 0,9904 | 0,9940 |
+   |                     |  0.967 |  0 | 19 |    1,0000 | 0,9544 | 0,9767 |
+   | Decision Tree       |    0.5 | 40 |  4 |    0,9117 | 0,9904 | 0,9494 |
+   |                     |  1.000 |  0 | 15 |    1,0000 | 0,9640 | 0,9817 |
+   | Random Forest       |    0.5 |  0 |  4 |    1,0000 | 0,9904 | 0,9952 |
+   |                     |  0.960 |  0 |  5 |    1,0000 | 0,9880 | 0,9940 |
+   | GBT                 |    0.5 |  5 |  4 |    0,9880 | 0,9904 | 0,9892 |
+   |                     |  0.978 |  0 |  4 |    1,0000 | 0,9904 | 0,9952 |
+   +---------------------+--------+----+----+-----------+--------+--------+
+
+[1m--- Thời gian (dữ liệu của Bảng 16) – dao động giữa các lần chạy, KHÔNG đưa vào đối chiếu ---[0m
+   +---------------------+----------------+------------------+
+   | Mô hình             | Huấn luyện (s) | Dự đoán test (s) |
+   +---------------------+----------------+------------------+
+   | Logistic Regression |         6,3000 |           1,2090 |
+   | Decision Tree       |         3,1000 |           0,7700 |
+   | Random Forest       |        12,6000 |           1,0660 |
+   | GBT                 |        51,8000 |           0,9010 |
+   +---------------------+----------------+------------------+
+
+[1m--- Độ quan trọng đặc trưng – Decision Tree ---------------------------------[0m
+   +------+-----------------------+---------------+
+   | Hạng |             Đặc trưng | Độ quan trọng |
+   +------+-----------------------+---------------+
+   | 1    |           origEmptied |        0,9469 |
+   | 2    | slog_errorBalanceDest |        0,0325 |
+   | 3    |    log_oldbalanceDest |        0,0092 |
+   | 4    |    log_newbalanceDest |        0,0055 |
+   | 5    | slog_errorBalanceOrig |        0,0030 |
+   | 6    |                  hour |        0,0015 |
+   | 7    |            log_amount |        0,0006 |
+   | 8    |     log_oldbalanceOrg |        0,0006 |
+   | 9    |       origZeroBalance |        0,0002 |
+   | 10   |         type_CASH_OUT |        0,0000 |
+   | 11   |    log_newbalanceOrig |        0,0000 |
+   | 12   |       destZeroBalance |        0,0000 |
+   +------+-----------------------+---------------+
+
+[1m--- Hệ số Logistic Regression (đã chuẩn hóa; dương = làm tăng khả năng gian lận) ---[0m
+   +-----------------------+---------+
+   | Đặc trưng             |   Hệ số |
+   +-----------------------+---------+
+   | slog_errorBalanceOrig | -1,2843 |
+   | log_newbalanceOrig    | -0,8164 |
+   | origZeroBalance       |  0,7644 |
+   | log_amount            |  0,7170 |
+   | log_oldbalanceDest    | -0,6995 |
+   | hour                  | -0,5463 |
+   | origEmptied           |  0,2671 |
+   | type_CASH_OUT         |  0,2634 |
+   | slog_errorBalanceDest |  0,1596 |
+   | log_newbalanceDest    | -0,1361 |
+   | destZeroBalance       |  0,0981 |
+   | log_oldbalanceOrg     | -0,0223 |
+   +-----------------------+---------+
+
+[1m--- Chọn mô hình tốt nhất ---------------------------------------------------[0m
+   Tiêu chí trên VALIDATION: AUC-PR cao nhất, sau đó F1, Precision; không làm tròn khi chọn
+   [92m✔ MÔ HÌNH ĐƯỢC CHỌN: Decision Tree; ngưỡng t* = 1.000000[0m
+
+[1m--- Hình kết quả mô hình ----------------------------------------------------[0m
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\A_temporal\figures\fig_metrics_comparison.png
+      Số liệu lấy từ : model_results.json → results (bảng so sánh ở bước 10)
+      Giá trị trên hình: chiều cao cột = Precision, Recall, F1, AUC-PR của từng mô hình
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\A_temporal\figures\fig_confusion_matrices.png
+      Số liệu lấy từ : model_results.json → TP/FP/FN/TN (bảng ở bước 10)
+      Giá trị trên hình: Logistic Regression: FP=0 FN=19; Decision Tree: FP=0 FN=15; Random Forest: FP=0 FN=5; GBT: FP=0 FN=4
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\A_temporal\figures\fig_roc_curves.png
+      Số liệu lấy từ : xác suất dự đoán của 4 mô hình trên tập kiểm thử (bước 9)
+      Giá trị trên hình: diện tích ROC: Logistic Regression: 0.9929, Decision Tree: 0.9952, Random Forest: 1.0000, GBT: 0.9989
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\A_temporal\figures\fig_pr_curves.png
+      Số liệu lấy từ : xác suất dự đoán của 4 mô hình trên tập kiểm thử (bước 9)
+      Giá trị trên hình: vẽ từ (xác suất dự đoán, nhãn thật) của toàn bộ tập kiểm thử
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\A_temporal\figures\fig_feature_importance.png
+      Số liệu lấy từ : model_results.json → feature_importance (bước 10)
+      Giá trị trên hình: top 3: origEmptied = 0.947, slog_errorBalanceDest = 0.032, log_oldbalanceDest = 0.009
+
+[1m--- THÍ NGHIỆM B_temporal: pre_transaction ----------------------------------[0m
+   +------------------+--------------+-------------+---------+
+   | Tập              | Số giao dịch | Số gian lận | Tỷ lệ % |
+   +------------------+--------------+-------------+---------+
+   | Huấn luyện (70%) |      193.250 |         358 |  0,1853 |
+   | Kiểm định (10%)  |       27.870 |          27 |  0,0969 |
+   | Kiểm thử (20%)   |       55.482 |         417 |  0,7516 |
+   +------------------+--------------+-------------+---------+
+   Trọng số lớp (w_c = N / (2·N_c)): gian lận = 269.90, bình thường = 0.5009
+
+[1m--- Mô hình 1/4: Logistic Regression ----------------------------------------[0m
+   Pipeline: StringIndexer -> OneHotEncoder -> VectorAssembler -> StandardScaler -> LogisticRegression
+   Huấn luyện xong trong 2.6s, đã lưu: outputs\experiments\20261013T052452Z_6331e780\B_temporal\models\logistic_regression
+   Ngưỡng tối ưu F1 trên tập kiểm định: t* = 0.9043
+
+[1m--- Mô hình 2/4: Decision Tree ----------------------------------------------[0m
+   Pipeline: StringIndexer -> OneHotEncoder -> VectorAssembler -> DecisionTreeClassifier
+   Huấn luyện xong trong 2.8s, đã lưu: outputs\experiments\20261013T052452Z_6331e780\B_temporal\models\decision_tree
+   Ngưỡng tối ưu F1 trên tập kiểm định: t* = 0.9945
+
+[1m--- Mô hình 3/4: Random Forest ----------------------------------------------[0m
+   Pipeline: StringIndexer -> OneHotEncoder -> VectorAssembler -> RandomForestClassifier
+   Huấn luyện xong trong 21.9s, đã lưu: outputs\experiments\20261013T052452Z_6331e780\B_temporal\models\random_forest
+   Ngưỡng tối ưu F1 trên tập kiểm định: t* = 0.9197
+
+[1m--- Mô hình 4/4: GBT --------------------------------------------------------[0m
+   Pipeline: StringIndexer -> OneHotEncoder -> VectorAssembler -> GBTClassifier
+   Huấn luyện xong trong 55.4s, đã lưu: outputs\experiments\20261013T052452Z_6331e780\B_temporal\models\gbt
+   Ngưỡng tối ưu F1 trên tập kiểm định: t* = 0.9675
+   Đã cố định mô hình từ Validation trước đánh giá Test: Decision Tree
+   Ma trận nhầm lẫn của Logistic Regression trên tập kiểm thử:
+   +-------------------------+-----------+-----------+
+   | Thực tế \ Dự đoán       | Dự đoán 0 | Dự đoán 1 |
+   +-------------------------+-----------+-----------+
+   | Thực tế 0 (bình thường) |    54.933 |       132 |
+   | Thực tế 1 (gian lận)    |       385 |        32 |
+   +-------------------------+-----------+-----------+
+   +-----------+---------+
+   | Chỉ số    | Giá trị |
+   +-----------+---------+
+   | Precision |  0,1951 |
+   | Recall    |  0,0767 |
+   | F1-score  |  0,1102 |
+   | AUC-ROC   |  0,7854 |
+   | AUC-PR    |  0,0490 |
+   +-----------+---------+
+   Ma trận nhầm lẫn của Decision Tree trên tập kiểm thử:
+   +-------------------------+-----------+-----------+
+   | Thực tế \ Dự đoán       | Dự đoán 0 | Dự đoán 1 |
+   +-------------------------+-----------+-----------+
+   | Thực tế 0 (bình thường) |    54.973 |        92 |
+   | Thực tế 1 (gian lận)    |       277 |       140 |
+   +-------------------------+-----------+-----------+
+   +-----------+---------+
+   | Chỉ số    | Giá trị |
+   +-----------+---------+
+   | Precision |  0,6034 |
+   | Recall    |  0,3357 |
+   | F1-score  |  0,4314 |
+   | AUC-ROC   |  0,7040 |
+   | AUC-PR    |  0,3407 |
+   +-----------+---------+
+   Ma trận nhầm lẫn của Random Forest trên tập kiểm thử:
+   +-------------------------+-----------+-----------+
+   | Thực tế \ Dự đoán       | Dự đoán 0 | Dự đoán 1 |
+   +-------------------------+-----------+-----------+
+   | Thực tế 0 (bình thường) |    55.057 |         8 |
+   | Thực tế 1 (gian lận)    |       364 |        53 |
+   +-------------------------+-----------+-----------+
+   +-----------+---------+
+   | Chỉ số    | Giá trị |
+   +-----------+---------+
+   | Precision |  0,8689 |
+   | Recall    |  0,1271 |
+   | F1-score  |  0,2218 |
+   | AUC-ROC   |  0,7824 |
+   | AUC-PR    |  0,2250 |
+   +-----------+---------+
+   Ma trận nhầm lẫn của GBT trên tập kiểm thử:
+   +-------------------------+-----------+-----------+
+   | Thực tế \ Dự đoán       | Dự đoán 0 | Dự đoán 1 |
+   +-------------------------+-----------+-----------+
+   | Thực tế 0 (bình thường) |    54.996 |        69 |
+   | Thực tế 1 (gian lận)    |       292 |       125 |
+   +-------------------------+-----------+-----------+
+   +-----------+---------+
+   | Chỉ số    | Giá trị |
+   +-----------+---------+
+   | Precision |  0,6443 |
+   | Recall    |  0,2998 |
+   | F1-score  |  0,4092 |
+   | AUC-ROC   |  0,7740 |
+   | AUC-PR    |  0,3220 |
+   +-----------+---------+
+
+[1m--- Bảng so sánh 4 mô hình trên tập kiểm thử (dữ liệu của Bảng 13) ----------[0m
+   +---------------------+--------+-----------+--------+--------+---------+--------+
+   | Mô hình             |     t* | Precision | Recall |     F1 | AUC-ROC | AUC-PR |
+   +---------------------+--------+-----------+--------+--------+---------+--------+
+   | Logistic Regression | 0,9040 |    0,1951 | 0,0767 | 0,1102 |  0,7854 | 0,0490 |
+   | Decision Tree       | 0,9950 |    0,6034 | 0,3357 | 0,4314 |  0,7040 | 0,3407 |
+   | Random Forest       | 0,9200 |    0,8689 | 0,1271 | 0,2218 |  0,7824 | 0,2250 |
+   | GBT                 | 0,9680 |    0,6443 | 0,2998 | 0,4092 |  0,7740 | 0,3220 |
+   | Luật isFlaggedFraud |      - |    0,0000 | 0,0000 | 0,0000 |       - |      - |
+   +---------------------+--------+-----------+--------+--------+---------+--------+
+
+[1m--- Ma trận nhầm lẫn 4 mô hình (dữ liệu của Bảng 14) ------------------------[0m
+   +---------------------+-----+-----+-----+--------+-------------+----------+
+   | Mô hình             |  TP |  FP |  FN |     TN | Specificity | Accuracy |
+   +---------------------+-----+-----+-----+--------+-------------+----------+
+   | Logistic Regression |  32 | 132 | 385 | 54.933 |      0,9976 |   0,9907 |
+   | Decision Tree       | 140 |  92 | 277 | 54.973 |      0,9983 |   0,9933 |
+   | Random Forest       |  53 |   8 | 364 | 55.057 |      0,9999 |   0,9933 |
+   | GBT                 | 125 |  69 | 292 | 54.996 |      0,9988 |   0,9935 |
+   +---------------------+-----+-----+-----+--------+-------------+----------+
+
+[1m--- Ngưỡng 0,5 so với t* (dữ liệu của Bảng 15) ------------------------------[0m
+   +---------------------+--------+--------+-----+-----------+--------+--------+
+   | Mô hình             | Ngưỡng |     FP |  FN | Precision | Recall |     F1 |
+   +---------------------+--------+--------+-----+-----------+--------+--------+
+   | Logistic Regression |    0.5 | 11.544 | 121 |    0,0250 | 0,7098 | 0,0483 |
+   |                     |  0.904 |    132 | 385 |    0,1951 | 0,0767 | 0,1102 |
+   | Decision Tree       |    0.5 |  8.869 | 156 |    0,0286 | 0,6259 | 0,0547 |
+   |                     |  0.995 |     92 | 277 |    0,6034 | 0,3357 | 0,4314 |
+   | Random Forest       |    0.5 |  3.356 | 232 |    0,0522 | 0,4436 | 0,0935 |
+   |                     |  0.920 |      8 | 364 |    0,8689 | 0,1271 | 0,2218 |
+   | GBT                 |    0.5 |  8.044 | 161 |    0,0308 | 0,6139 | 0,0587 |
+   |                     |  0.968 |     69 | 292 |    0,6443 | 0,2998 | 0,4092 |
+   +---------------------+--------+--------+-----+-----------+--------+--------+
+
+[1m--- Thời gian (dữ liệu của Bảng 16) – dao động giữa các lần chạy, KHÔNG đưa vào đối chiếu ---[0m
+   +---------------------+----------------+------------------+
+   | Mô hình             | Huấn luyện (s) | Dự đoán test (s) |
+   +---------------------+----------------+------------------+
+   | Logistic Regression |         2,6000 |           0,7700 |
+   | Decision Tree       |         2,8000 |           0,6260 |
+   | Random Forest       |        21,9000 |           1,2290 |
+   | GBT                 |        55,4000 |           0,8350 |
+   +---------------------+----------------+------------------+
+
+[1m--- Độ quan trọng đặc trưng – Decision Tree ---------------------------------[0m
+   +------+---------------+---------------+
+   | Hạng |     Đặc trưng | Độ quan trọng |
+   +------+---------------+---------------+
+   | 1    |    log_amount |        0,4689 |
+   | 2    |          hour |        0,3137 |
+   | 3    | type_CASH_OUT |        0,2174 |
+   +------+---------------+---------------+
+
+[1m--- Hệ số Logistic Regression (đã chuẩn hóa; dương = làm tăng khả năng gian lận) ---[0m
+   +---------------+---------+
+   | Đặc trưng     |   Hệ số |
+   +---------------+---------+
+   | type_CASH_OUT | -0,5228 |
+   | log_amount    |  0,4362 |
+   | hour          | -0,3321 |
+   +---------------+---------+
+
+[1m--- Chọn mô hình tốt nhất ---------------------------------------------------[0m
+   Tiêu chí trên VALIDATION: AUC-PR cao nhất, sau đó F1, Precision; không làm tròn khi chọn
+   [92m✔ MÔ HÌNH ĐƯỢC CHỌN: Decision Tree; ngưỡng t* = 0.994536[0m
+
+[1m--- Hình kết quả mô hình ----------------------------------------------------[0m
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\B_temporal\figures\fig_metrics_comparison.png
+      Số liệu lấy từ : model_results.json → results (bảng so sánh ở bước 10)
+      Giá trị trên hình: chiều cao cột = Precision, Recall, F1, AUC-PR của từng mô hình
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\B_temporal\figures\fig_confusion_matrices.png
+      Số liệu lấy từ : model_results.json → TP/FP/FN/TN (bảng ở bước 10)
+      Giá trị trên hình: Logistic Regression: FP=132 FN=385; Decision Tree: FP=92 FN=277; Random Forest: FP=8 FN=364; GBT: FP=69 FN=292
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\B_temporal\figures\fig_roc_curves.png
+      Số liệu lấy từ : xác suất dự đoán của 4 mô hình trên tập kiểm thử (bước 9)
+      Giá trị trên hình: diện tích ROC: Logistic Regression: 0.7854, Decision Tree: 0.7040, Random Forest: 0.7824, GBT: 0.7740
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\B_temporal\figures\fig_pr_curves.png
+      Số liệu lấy từ : xác suất dự đoán của 4 mô hình trên tập kiểm thử (bước 9)
+      Giá trị trên hình: vẽ từ (xác suất dự đoán, nhãn thật) của toàn bộ tập kiểm thử
+   [92m>> ĐÃ VẼ HÌNH:[0m outputs\experiments\20261013T052452Z_6331e780\B_temporal\figures\fig_feature_importance.png
+      Số liệu lấy từ : model_results.json → feature_importance (bước 10)
+      Giá trị trên hình: top 3: log_amount = 0.469, hour = 0.314, type_CASH_OUT = 0.217
+   [92m✔ Đã kiểm chứng và công bố lần chạy 20261013T052452Z_6331e780[0m
+[92m[✔] BƯỚC 1/3. THỰC NGHIỆM A/B × PHÂN TẦNG/THỜI GIAN – HOÀN THÀNH (1516.1s)[0m
+
+==============================================================================
+[1m[96m[ ] BƯỚC 2/3. BÁO CÁO WORD[0m
+==============================================================================
+[93m[–] BƯỚC 2/3. BÁO CÁO WORD – BỎ QUA: demo giữ nguyên artifacts; dùng --word-only khi cần dựng báo cáo[0m
+
+==============================================================================
+[1m[96m[ ] BƯỚC 3/3. ỨNG DỤNG WEB[0m
+==============================================================================
+[93m[–] BƯỚC 3/3. ỨNG DỤNG WEB – BỎ QUA: --no-app[0m
+
+[1m========================= TỔNG KẾT CÁC BƯỚC =========================[0m
+  [92m[✔][0m Bước  1: THỰC NGHIỆM A/B × PHÂN TẦNG/THỜI GIAN (1516.1s)
+  [93m[–][0m Bước  2: BÁO CÁO WORD (0.0s)
+  [93m[–][0m Bước  3: ỨNG DỤNG WEB (0.0s)
+  Tổng thời gian: 25.3 phút
+SUCCESS: The process with PID 14940 (child process of PID 1300) has been terminated.
+SUCCESS: The process with PID 1300 (child process of PID 9692) has been terminated.
+SUCCESS: The process with PID 9692 (child process of PID 24236) has been terminated.

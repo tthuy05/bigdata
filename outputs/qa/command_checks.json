@@ -1,0 +1,12 @@
+{
+  "CLI --help": "VERIFIED: exit 0; cli_help.log",
+  "CSV thiếu": "VERIFIED: exit 1, missing_data.log, không báo thành công/không tạo thực nghiệm",
+  "Python syntax": "VERIFIED: compileall exit 0",
+  "Word generation": "VERIFIED nội dung sinh từ run; word_build.log. Bố cục NOT VERIFIED",
+  "Định dạng số Word": "VERIFIED: giữ dấu âm (-1,0), report_formatter.log",
+  "Saved demo từ thư mục cha": "VERIFIED: CLI exit 0, nạp/transform đủ 4 model, saved_demo.log",
+  "Saved artifacts": "VERIFIED: 659 file nội dung không đổi sau demo",
+  "Curves/model replay": "VERIFIED: 16 model nạp lại khớp confusion/AUC, curve_consistency.json",
+  "Streamlit/QA": "VERIFIED: 18 tests passed, gồm đổi A/B, CSV lỗi, download bytes và 3 tabs; pytest.xml",
+  "CSV demo": "VERIFIED: 336 dòng từ CSV gốc, 82 gian lận; demo_csv.log"
+}
