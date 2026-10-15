@@ -1,0 +1,262 @@
+{
+  "schema_version": 2,
+  "experiment": "B_temporal",
+  "feature_profile": "pre_transaction",
+  "features": [
+    "type_CASH_OUT",
+    "log_amount",
+    "hour"
+  ],
+  "split": {
+    "method": "temporal",
+    "train": 193250,
+    "train_fraud": 358,
+    "train_normal": 192892,
+    "train_fraud_rate": 0.001852522639068564,
+    "train_step_range": [
+      1,
+      322
+    ],
+    "valid": 27870,
+    "valid_fraud": 27,
+    "valid_normal": 27843,
+    "valid_fraud_rate": 0.000968783638320775,
+    "valid_step_range": [
+      323,
+      354
+    ],
+    "test": 55482,
+    "test_fraud": 417,
+    "test_normal": 55065,
+    "test_fraud_rate": 0.00751595111928193,
+    "test_step_range": [
+      355,
+      742
+    ],
+    "class_weights": {
+      "1": 269.9022346368715,
+      "0": 0.5009279804242789
+    },
+    "train_end_step": 322,
+    "valid_end_step": 354,
+    "boundary_policy": "nearest cumulative row fractions 70/80%; entire steps",
+    "overlapping_rows": 0
+  },
+  "results": {
+    "Logistic Regression": {
+      "TP": 32,
+      "TN": 54933,
+      "FP": 132,
+      "FN": 385,
+      "precision": 0.1951219512195122,
+      "recall": 0.07673860911270983,
+      "f1": 0.1101549053356282,
+      "accuracy": 0.9906816625211781,
+      "specificity": 0.9976028330155271,
+      "auc_roc": 0.7854115291259243,
+      "auc_pr": 0.0490222129435304,
+      "at_default_0_5": {
+        "TP": 296,
+        "FP": 11544,
+        "FN": 121,
+        "precision": 0.025,
+        "recall": 0.709832134292566,
+        "f1": 0.04829893122297463
+      },
+      "threshold": 0.9042681997347739,
+      "train_time_s": 2.6,
+      "predict_time_s": 0.77,
+      "validation": {
+        "TP": 1,
+        "TN": 27768,
+        "FP": 75,
+        "FN": 26,
+        "precision": 0.013157894736842105,
+        "recall": 0.037037037037037035,
+        "f1": 0.019417475728155338,
+        "accuracy": 0.9963760315751704,
+        "specificity": 0.9973063247494882,
+        "auc_roc": 0.7286677547784657,
+        "auc_pr": 0.002479369456297525
+      },
+      "evaluation_scope": "test",
+      "score_column": "probability[1]",
+      "auc_method": "Spark BinaryClassificationEvaluator numBins=0",
+      "timing_scope": "fit only; transform+cache materialization only; excludes metrics",
+      "selected_before_test": false
+    },
+    "Decision Tree": {
+      "TP": 140,
+      "TN": 54973,
+      "FP": 92,
+      "FN": 277,
+      "precision": 0.603448275862069,
+      "recall": 0.33573141486810554,
+      "f1": 0.4314329738058552,
+      "accuracy": 0.9933491943332973,
+      "specificity": 0.9983292472532461,
+      "auc_roc": 0.704049280325127,
+      "auc_pr": 0.3406992182061733,
+      "at_default_0_5": {
+        "TP": 261,
+        "FP": 8869,
+        "FN": 156,
+        "precision": 0.028587075575027383,
+        "recall": 0.6258992805755396,
+        "f1": 0.05467686184141615
+      },
+      "threshold": 0.9945363711208896,
+      "train_time_s": 2.8,
+      "predict_time_s": 0.626,
+      "validation": {
+        "TP": 6,
+        "TN": 27842,
+        "FP": 1,
+        "FN": 21,
+        "precision": 0.8571428571428571,
+        "recall": 0.2222222222222222,
+        "f1": 0.35294117647058826,
+        "accuracy": 0.999210620739146,
+        "specificity": 0.9999640843299932,
+        "auc_roc": 0.653426421429151,
+        "auc_pr": 0.25105380123269283
+      },
+      "evaluation_scope": "test",
+      "score_column": "probability[1]",
+      "auc_method": "Spark BinaryClassificationEvaluator numBins=0",
+      "timing_scope": "fit only; transform+cache materialization only; excludes metrics",
+      "selected_before_test": true
+    },
+    "Random Forest": {
+      "TP": 53,
+      "TN": 55057,
+      "FP": 8,
+      "FN": 364,
+      "precision": 0.8688524590163934,
+      "recall": 0.12709832134292565,
+      "f1": 0.2217573221757322,
+      "accuracy": 0.9932951227425111,
+      "specificity": 0.9998547171524562,
+      "auc_roc": 0.7823614167777736,
+      "auc_pr": 0.2250198264529871,
+      "at_default_0_5": {
+        "TP": 185,
+        "FP": 3356,
+        "FN": 232,
+        "precision": 0.052245128494775486,
+        "recall": 0.44364508393285373,
+        "f1": 0.09348155634158667
+      },
+      "threshold": 0.9197150086256533,
+      "train_time_s": 21.9,
+      "predict_time_s": 1.229,
+      "validation": {
+        "TP": 4,
+        "TN": 27842,
+        "FP": 1,
+        "FN": 23,
+        "precision": 0.8,
+        "recall": 0.14814814814814814,
+        "f1": 0.25,
+        "accuracy": 0.9991388589881594,
+        "specificity": 0.9999640843299932,
+        "auc_roc": 0.7511868798727254,
+        "auc_pr": 0.13197599841748722
+      },
+      "evaluation_scope": "test",
+      "score_column": "probability[1]",
+      "auc_method": "Spark BinaryClassificationEvaluator numBins=0",
+      "timing_scope": "fit only; transform+cache materialization only; excludes metrics",
+      "selected_before_test": false
+    },
+    "GBT": {
+      "TP": 125,
+      "TN": 54996,
+      "FP": 69,
+      "FN": 292,
+      "precision": 0.6443298969072165,
+      "recall": 0.2997601918465228,
+      "f1": 0.4091653027823241,
+      "accuracy": 0.9934933852420604,
+      "specificity": 0.9987469354399346,
+      "auc_roc": 0.7740042561428926,
+      "auc_pr": 0.32202392074457337,
+      "at_default_0_5": {
+        "TP": 256,
+        "FP": 8044,
+        "FN": 161,
+        "precision": 0.030843373493975902,
+        "recall": 0.6139088729016786,
+        "f1": 0.0587358036021567
+      },
+      "threshold": 0.9675071493779442,
+      "train_time_s": 55.4,
+      "predict_time_s": 0.835,
+      "validation": {
+        "TP": 6,
+        "TN": 27840,
+        "FP": 3,
+        "FN": 21,
+        "precision": 0.6666666666666666,
+        "recall": 0.2222222222222222,
+        "f1": 0.3333333333333333,
+        "accuracy": 0.9991388589881594,
+        "specificity": 0.9998922529899795,
+        "auc_roc": 0.7814923892034834,
+        "auc_pr": 0.22216526893621025
+      },
+      "evaluation_scope": "test",
+      "score_column": "probability[1]",
+      "auc_method": "Spark BinaryClassificationEvaluator numBins=0",
+      "timing_scope": "fit only; transform+cache materialization only; excludes metrics",
+      "selected_before_test": false
+    }
+  },
+  "status": "VERIFIED",
+  "run_id": "20261013T052452Z_6331e780",
+  "data": {
+    "path": "C:\\Users\\nguye\\OneDrive\\Desktop\\Project\\fraud_detection_spark_v3\\fraud_detection_spark\\data\\PS_20174392719_1491204439457_log.csv",
+    "sha256": "16910f90577b0d981bf8ff289714510bb89bc71bff7d3f220f024e287e4eea6b",
+    "sample_fraction": 0.1,
+    "sampling": "uniform stable row-hash sample, same for all classes; no oversampling",
+    "origin": "user-provided PaySim CSV; not externally authenticated",
+    "modeling_rows": 276602,
+    "clean_rows": 6362620
+  },
+  "rule_baseline": {
+    "TP": 0,
+    "TN": 55065,
+    "FP": 0,
+    "FN": 417,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0
+  },
+  "best_model": "Decision Tree",
+  "feature_importance_model": "Decision Tree",
+  "feature_importance": {
+    "type_CASH_OUT": 0.21738419542456552,
+    "log_amount": 0.4688958086324528,
+    "hour": 0.3137199959429817
+  },
+  "lr_coefficients": {
+    "type_CASH_OUT": -0.5227520878265918,
+    "log_amount": 0.43623082632850974,
+    "hour": -0.33214760566954815
+  },
+  "selection": {
+    "dataset": "validation",
+    "criteria": [
+      "auc_pr",
+      "f1",
+      "precision"
+    ]
+  },
+  "figures": [
+    "fig_metrics_comparison.png",
+    "fig_confusion_matrices.png",
+    "fig_roc_curves.png",
+    "fig_pr_curves.png",
+    "fig_feature_importance.png"
+  ]
+}

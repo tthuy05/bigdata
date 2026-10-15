@@ -160,6 +160,13 @@ def print_confusion(name, met):
              ["Thực tế 1 (gian lận)", met["FN"], met["TP"]]])
 
 
+def _safe_relpath(p):
+    try:
+        return os.path.relpath(p)
+    except (ValueError, OSError):
+        return str(p)
+
+
 # --------------------------------------------------------------------------- huấn luyện
 def train_all(train, valid, test, use_saved: bool, prev: dict, profile="post_transaction", model_dir=None):
     results, curves, fitted = {}, {}, {}
@@ -176,14 +183,14 @@ def train_all(train, valid, test, use_saved: bool, prev: dict, profile="post_tra
         if use_saved and os.path.exists(path):
             model = load_pipeline(path)
             t_train = prev.get(name, {}).get("train_time_s")
-            c.info(f"Nạp mô hình đã lưu: {os.path.relpath(path)} ({time.time() - t0:.1f}s)")
+            c.info(f"Nạp mô hình đã lưu: {_safe_relpath(path)} ({time.time() - t0:.1f}s)")
         else:
             stages = preprocessing_stages(scale, profile) + [clf]
             c.info("Pipeline: " + " -> ".join(type(s).__name__ for s in stages))
             model = Pipeline(stages=stages).fit(train)
             t_train = round(time.time() - t0, 1)
             save_pipeline(model, path)
-            c.info(f"Huấn luyện xong trong {t_train:.1f}s, đã lưu: {os.path.relpath(path)}")
+            c.info(f"Huấn luyện xong trong {t_train:.1f}s, đã lưu: {_safe_relpath(path)}")
         valid_pred = proba(model.transform(valid)).cache()
         valid_pdf = valid_pred.select(config.LABEL, "prob").toPandas()
         thr = threshold_from_scores(valid_pdf[config.LABEL].values, valid_pdf["prob"].values)

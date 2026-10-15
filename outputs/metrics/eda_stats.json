@@ -57,7 +57,7 @@
     {
       "isFraud": 0,
       "mean": 178197.04,
-      "median": 74667.05,
+      "median": 74670.06,
       "min": 0.01,
       "max": 92445516.64,
       "std": 596236.98
@@ -282,19 +282,19 @@
     },
     "mean": {
       "step": "243.39724563151657",
-      "amount": "179861.9035491315",
-      "oldbalanceOrg": "833883.1040744894",
-      "newbalanceOrig": "855113.6685785883",
-      "oldbalanceDest": "1100701.6665196442",
-      "newbalanceDest": "1224996.398201914"
+      "amount": "179861.90354913124",
+      "oldbalanceOrg": "833883.1040744885",
+      "newbalanceOrig": "855113.6685785864",
+      "oldbalanceDest": "1100701.6665196356",
+      "newbalanceDest": "1224996.3982019145"
     },
     "stddev": {
-      "step": "142.33197104912995",
-      "amount": "603858.2314629399",
-      "oldbalanceOrg": "2888242.6730375555",
-      "newbalanceOrig": "2924048.5029542893",
-      "oldbalanceDest": "3399180.1129944744",
-      "newbalanceDest": "3674128.9421196315"
+      "step": "142.33197104913012",
+      "amount": "603858.2314629337",
+      "oldbalanceOrg": "2888242.673037555",
+      "newbalanceOrig": "2924048.5029542577",
+      "oldbalanceDest": "3399180.11299447",
+      "newbalanceDest": "3674128.9421196356"
     },
     "min": {
       "step": "1",
@@ -315,14 +315,14 @@
   },
   "relevant_rows": 2770409,
   "corr_with_label": {
-    "amount": 0.3364705960228301,
-    "oldbalanceOrg": 0.3688914858587933,
-    "newbalanceOrig": 0.0781696349027514,
-    "oldbalanceDest": -0.1156688633607983,
-    "newbalanceDest": -0.06925288658003273,
-    "errorBalanceOrig": -0.1532805964931867,
-    "errorBalanceDest": 0.2952158429268816,
-    "origEmptied": 0.9846048892132186,
-    "destZeroBalance": 0.6555535064867454
+    "amount": 0.3319004377500699,
+    "oldbalanceOrg": 0.3689414624107358,
+    "newbalanceOrig": 0.07874857815587398,
+    "oldbalanceDest": -0.11843146318252404,
+    "newbalanceDest": -0.07094556170357183,
+    "errorBalanceOrig": -0.14861531278746765,
+    "errorBalanceDest": 0.31742786361519376,
+    "origEmptied": 0.9846025368768472,
+    "destZeroBalance": 0.6552890589424185
   }
 }

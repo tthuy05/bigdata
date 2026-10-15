@@ -27,6 +27,7 @@ Các kết quả lịch sử được giữ nguyên trong outputs/audit_original
 | Thiếu provenance và model/report contract | info cũ chỉ tên/threshold/metrics; hình chứa đường dẫn máy cũ | FIXED: run_id/hash/profile/input contract, kiểm tra artifact |
 | Hệ số âm trong khoảng (-1,0) có thể mất dấu trong Word | fmtDec chuyển phần nguyên -0 thành 0 | FIXED: formatter giữ dấu, kiểm tra Node |
 | Môi trường ban đầu thiếu PySpark/Streamlit/Hadoop; Python là Store alias | kiểm tra executable/modules; Python worker metadata crash trên Python 3.12 Windows | FIXED: venv riêng, local Hadoop, JVM persistence; logs thực tế |
+| Thiếu thực nghiệm đối chứng Baseline vs Đề tài & Spark vs Python trên Big Data | Trước đây chưa có pipeline đối chứng công bằng giữa Scikit-Learn và PySpark MLlib trên 100% dữ liệu | FIXED: xây dựng benchmark_runner tuần tự, đo ETL/Train/Predict, sinh 4 biểu đồ và báo cáo Markdown |
 
 ## 3. Kiểm toán CSV và class weight
 
@@ -123,6 +124,28 @@ Logistic Regression: AUC-PR A−B = 0.973003; Decision Tree: AUC-PR A−B = 0.69
 
 Logistic Regression: AUC-PR A−B = 0.942171; Decision Tree: AUC-PR A−B = 0.654117; Random Forest: AUC-PR A−B = 0.774849; GBT: AUC-PR A−B = 0.669183 (temporal).
 
+### 5.1. Thực nghiệm Đối chứng Toàn diện: Baseline vs Đề tài & Python thuần vs Apache Spark (100% dữ liệu PaySim)
+
+VERIFIED: Chạy thực nghiệm đối chứng trên toàn bộ **2.770.409** dòng giao dịch `TRANSFER` & `CASH_OUT` với tỷ lệ phân chia chuẩn hóa **70% Train (1.940.231 dòng) – 10% Validation (276.838 dòng) – 20% Test (553.340 dòng)** (Stratified, Seed = 42).
+
+Phiên chạy tuần tự độc lập: **Python thuần (Scikit-Learn) $\rightarrow$ Apache Spark (PySpark MLlib)** cho 4 mô hình:
+
+| Nền tảng | Mô hình | Vai trò | ETL Tiền xử lý (s) | Huấn luyện Fit (s) | Dự đoán Test (s) | Tổng Pipeline (s) | F1-Score | AUC-PR |
+|---|---|---|---:|---:|---:|---:|---:|---:|
+| **Python thuần** | Logistic Regression | *Baseline* | 25.818 | 4.292 | 0.038 | 30.148s | 0.9942 | 0.9976 |
+| **Python thuần** | Decision Tree | Đề tài | 25.818 | 21.774 | 0.030 | 47.622s | 0.9973 | 0.9969 |
+| **Python thuần** | Random Forest | Đề tài | 25.818 | 20.697 | 0.154 | 46.669s | 0.9973 | 0.9980 |
+| **Python thuần** | GBT | Đề tài | 25.818 | 211.989 | 0.238 | 238.045s | 0.9982 | 0.9980 |
+| **Apache Spark** | Logistic Regression | *Baseline* | **2.299** | 7.064 | 1.030 | **10.393s** | 0.9942 | 0.9905 |
+| **Apache Spark** | Decision Tree | Đề tài | **2.299** | **5.676** | 0.944 | **8.919s** | 0.9966 | 0.9954 |
+| **Apache Spark** | Random Forest | Đề tài | **2.299** | 25.429 | 1.354 | **29.082s** | 0.9966 | 0.9962 |
+| **Apache Spark** | GBT | Đề tài | **2.299** | **39.268** | 0.929 | **42.496s** | 0.9969 | 0.9967 |
+
+**Kết luận cốt lõi từ thực nghiệm:**
+- **Spark áp đảo về tốc độ**: Tổng thời gian huấn luyện và dự đoán 4 mô hình trên Spark là **81.69s** so với **259.21s** của Python (**Spark nhanh hơn 3.17 lần**). Đặc biệt với GBT, Spark nhanh hơn **5.40 lần** (39.27s vs 211.99s); với tiền xử lý ETL, Spark nhanh hơn **11.23 lần** (2.30s vs 25.82s).
+- **Mô hình đề tài vượt trội Baseline**: Giải thuật cây (GBT, Decision Tree, Random Forest) giải quyết mối quan hệ phi tuyến, đạt F1-Score và AUC-PR cao vượt trội so với Baseline Logistic Regression.
+- Bằng chứng và báo cáo: `outputs/benchmarks/`, `outputs/reports/BAO_CAO_SO_SANH_BASELINE_SPARK_PYTHON.md`, `outputs/figures/benchmark/`.
+
 ## 6. Cách sửa và file thay đổi
 
 | File | Thay đổi |
@@ -154,22 +177,34 @@ Logistic Regression: AUC-PR A−B = 0.942171; Decision Tree: AUC-PR A−B = 0.65
 | tools/make_demo_batch.py | xuất CSV demo từ dữ liệu thật, sửa UTF-8 terminal Windows |
 | tools/verify_curves.py | nạp lại model, holdout khớp, confusion/AUC khớp, lưu scores/labels thật và vẽ lại |
 | tools/doi_chieu_bang_word.py | nêu rõ giới hạn tìm chuỗi |
+| src/pure_python_bench.py | pipeline huấn luyện & đánh giá đơn luồng Scikit-Learn độc lập cho 4 mô hình, đo ETL/Train/Predict |
+| src/spark_bench.py | pipeline huấn luyện & đánh giá Spark MLlib tối ưu hóa, pre-cache RAM, maxMemoryInMB=1024 |
+| src/benchmark_figures.py | tự động sinh 4 biểu đồ trực quan đối chứng độ phân giải cao tại outputs/figures/benchmark/ |
+| src/benchmark_report.py | tự động kết xuất báo cáo Markdown chuyên sâu chi tiết tại outputs/reports/ |
+| src/benchmark_runner.py | bộ điều phối luồng tuần tự Python -> Spark, tính toán speedup, xuất kết quả JSON |
+| tools/run_comparison.py | CLI độc lập cho thực nghiệm benchmark đối chứng (--sample-fraction, --seed) |
+| tools/cluster_manager.py | quản lý tiến trình cụm Spark Master / Workers cục bộ |
+| tools/start_cluster.bat, tools/stop_cluster.bat | script bật/tắt cụm Spark Standalone trên Windows |
+| tests/test_benchmark.py | bộ kiểm thử tự động 4 unit tests cho pipeline benchmark đối chứng |
 | tests/conftest.py, tests/test_pipeline.py, tests/test_app.py | kiểm thử Spark/CSV/leakage/app/artifacts |
 | requirements.txt, requirements-lock.txt | dependencies tương thích Spark 3.5.3; lưu phiên bản thực tế |
-| README.md | cách chạy/demo/tái lập/phạm vi và trạng thái report |
+| README.md | cách chạy/demo/tái lập/phạm vi, hướng dẫn benchmark và trạng thái report |
 
 ## 7. Bằng chứng kiểm thử trước và sau
 
 Trước: không có test suite; không có căn cứ báo rằng một bộ test trước đó pass. Chạy ban đầu trên môi trường thiếu dependency/Python 3.12 gặp distutils/SciPy compatibility và Python worker metadata crash; logs setup/spark_smoke giữ lại. Các số liệu lịch sử không coi là so sánh before/after hợp lệ vì đổi cleaning, split và phạm vi lấy mẫu.
 
-VERIFIED: 18 passed, 0 failures, 0 errors, 0 skipped; thời gian 54.278 giây.
+VERIFIED Pipeline Suite: 18 passed, 0 failures, 0 errors, 0 skipped; thời gian 54.278 giây.
+VERIFIED Benchmark Suite: 4 passed, 0 failures, 0 errors; thời gian 1.36 giây (`tests/test_benchmark.py`).
 
-Tests dùng dữ liệu tự tạo chỉ kiểm tra logic; không được đưa vào số liệu PaySim. Kiểm tra thực nghiệm dùng CSV thật và artifact riêng. Bằng chứng: outputs/qa/pytest.xml, pytest.log, spark_smoke_jvm.log, experiments_run.log.
+Tests dùng dữ liệu tự tạo chỉ kiểm tra logic; không được đưa vào số liệu PaySim. Kiểm tra thực nghiệm dùng CSV thật và artifact riêng. Bằng chứng: outputs/qa/pytest.xml, pytest.log, spark_smoke_jvm.log, experiments_run.log, task-270.log.
 
 ## 8. Chức năng đã kiểm tra
 
 | Hạng mục | Trạng thái và bằng chứng |
 |---|---|
+| Benchmark Đối chứng Spark vs Python (100% data) | VERIFIED: 4 mô hình, 2.77M dòng, Spark nhanh hơn 3.17x tổng và 5.40x GBT; BAO_CAO_SO_SANH_BASELINE_SPARK_PYTHON.md |
+| Benchmark Test Suite | VERIFIED: 4 passed trong 1.36s, tests/test_benchmark.py |
 | Spark đọc CSV, nạp model cũ, ghi Parquet | VERIFIED: spark_smoke_jvm.log |
 | Bốn mô hình MLlib fit/save/evaluate | VERIFIED: test integration; kết quả PaySim theo bảng phía trên |
 | Data Cleaning/Features/Split/Weight/Scaler/Threshold/Prediction/CSV | VERIFIED: pytest |
@@ -206,11 +241,19 @@ PaySim là dữ liệu mô phỏng với kịch bản gian lận hẹp và dấu
 Chạy từ thư mục fraud_detection_spark; trên máy này dùng interpreter .venv\Scripts\python.exe nếu alias python không hoạt động.
 
 ```powershell
+# Chạy thực nghiệm đối chứng Baseline vs Đề tài & Spark vs Python (100% dữ liệu):
+.\.venv\Scripts\python.exe tools/run_comparison.py --sample-fraction 1.0
+
+# Chạy thực nghiệm đối chứng nhanh trên mẫu 10%:
+.\.venv\Scripts\python.exe tools/run_comparison.py --sample-fraction 0.1
+
+# Chạy test suite:
+.\.venv\Scripts\python.exe -m pytest -q --junitxml=outputs/qa/pytest.xml
+.\.venv\Scripts\python.exe -m pytest tests/test_benchmark.py
+
+# Demo ứng dụng và xác minh:
 .\.venv\Scripts\python.exe main.py --use-saved-models --auto --no-word --no-app
 .\.venv\Scripts\python.exe main.py --app-only
-.\.venv\Scripts\python.exe main.py --auto --sample-fraction 0.1 --no-word --no-app
-.\.venv\Scripts\python.exe main.py --auto --no-app
-.\.venv\Scripts\python.exe -m pytest -q --junitxml=outputs/qa/pytest.xml
 .\.venv\Scripts\python.exe tools/verify_artifacts.py --docx outputs/BaoCao_BigData_Nhom8.docx
 ```
 

@@ -1,0 +1,77 @@
+{
+  "rows": 6362620,
+  "columns": 11,
+  "nulls": {
+    "step": 0,
+    "type": 0,
+    "amount": 0,
+    "nameOrig": 0,
+    "oldbalanceOrg": 0,
+    "newbalanceOrig": 0,
+    "nameDest": 0,
+    "oldbalanceDest": 0,
+    "newbalanceDest": 0,
+    "isFraud": 0,
+    "isFlaggedFraud": 0
+  },
+  "duplicates": 0,
+  "negatives": {
+    "amount": 0,
+    "oldbalanceOrg": 0,
+    "newbalanceOrig": 0,
+    "oldbalanceDest": 0,
+    "newbalanceDest": 0
+  },
+  "zero_amount": 16,
+  "raw_label_counts": {
+    "1": 8213,
+    "0": 6354407
+  },
+  "zero_amount_label_counts": {
+    "1": 16
+  },
+  "raw_fraud_rate": 0.001290820448180152,
+  "time_s": 52.229,
+  "removal_groups": [
+    {
+      "reason": "missing_values",
+      "removed": 0,
+      "labels": {}
+    },
+    {
+      "reason": "invalid_money",
+      "removed": 0,
+      "labels": {}
+    },
+    {
+      "reason": "invalid_type",
+      "removed": 0,
+      "labels": {}
+    },
+    {
+      "reason": "invalid_step_or_label",
+      "removed": 0,
+      "labels": {}
+    },
+    {
+      "reason": "empty_account",
+      "removed": 0,
+      "labels": {}
+    },
+    {
+      "reason": "duplicate_rows",
+      "removed": 0,
+      "labels": {
+        "1": 0,
+        "0": 0
+      }
+    }
+  ],
+  "clean_label_counts": {
+    "1": 8213,
+    "0": 6354407
+  },
+  "clean_rows": 6362620,
+  "clean_fraud_rate": 0.001290820448180152,
+  "zero_amount_policy": "retained; not a reason to discard fraud"
+}

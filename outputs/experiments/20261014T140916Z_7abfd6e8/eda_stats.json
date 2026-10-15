@@ -1,0 +1,328 @@
+{
+  "label": [
+    {
+      "isFraud": 0,
+      "n": 6354407,
+      "pct": 99.8709
+    },
+    {
+      "isFraud": 1,
+      "n": 8213,
+      "pct": 0.1291
+    }
+  ],
+  "by_type": [
+    {
+      "type": "CASH_OUT",
+      "n": 2237500,
+      "fraud": 4116,
+      "fraud_rate_pct": 0.184,
+      "total_amount_billion": 394.41,
+      "avg_amount": 176273.96
+    },
+    {
+      "type": "PAYMENT",
+      "n": 2151495,
+      "fraud": 0,
+      "fraud_rate_pct": 0.0,
+      "total_amount_billion": 28.09,
+      "avg_amount": 13057.6
+    },
+    {
+      "type": "CASH_IN",
+      "n": 1399284,
+      "fraud": 0,
+      "fraud_rate_pct": 0.0,
+      "total_amount_billion": 236.37,
+      "avg_amount": 168920.24
+    },
+    {
+      "type": "TRANSFER",
+      "n": 532909,
+      "fraud": 4097,
+      "fraud_rate_pct": 0.7688,
+      "total_amount_billion": 485.29,
+      "avg_amount": 910647.01
+    },
+    {
+      "type": "DEBIT",
+      "n": 41432,
+      "fraud": 0,
+      "fraud_rate_pct": 0.0,
+      "total_amount_billion": 0.23,
+      "avg_amount": 5483.67
+    }
+  ],
+  "amount_by_label": [
+    {
+      "isFraud": 0,
+      "mean": 178197.04,
+      "median": 74670.06,
+      "min": 0.01,
+      "max": 92445516.64,
+      "std": 596236.98
+    },
+    {
+      "isFraud": 1,
+      "mean": 1467967.3,
+      "median": 440962.56,
+      "min": 0.0,
+      "max": 10000000.0,
+      "std": 2404252.95
+    }
+  ],
+  "max_fraud_amount": [
+    {
+      "n_10M": 287
+    }
+  ],
+  "by_hour": [
+    {
+      "hour": 0,
+      "n": 71587,
+      "fraud": 300,
+      "fraud_rate_pct": 0.4191
+    },
+    {
+      "hour": 1,
+      "n": 27111,
+      "fraud": 358,
+      "fraud_rate_pct": 1.3205
+    },
+    {
+      "hour": 2,
+      "n": 9018,
+      "fraud": 372,
+      "fraud_rate_pct": 4.1251
+    },
+    {
+      "hour": 3,
+      "n": 2007,
+      "fraud": 326,
+      "fraud_rate_pct": 16.2431
+    },
+    {
+      "hour": 4,
+      "n": 1241,
+      "fraud": 274,
+      "fraud_rate_pct": 22.079
+    },
+    {
+      "hour": 5,
+      "n": 1641,
+      "fraud": 366,
+      "fraud_rate_pct": 22.3035
+    },
+    {
+      "hour": 6,
+      "n": 3420,
+      "fraud": 358,
+      "fraud_rate_pct": 10.4678
+    },
+    {
+      "hour": 7,
+      "n": 8988,
+      "fraud": 328,
+      "fraud_rate_pct": 3.6493
+    },
+    {
+      "hour": 8,
+      "n": 26915,
+      "fraud": 368,
+      "fraud_rate_pct": 1.3673
+    },
+    {
+      "hour": 9,
+      "n": 283518,
+      "fraud": 341,
+      "fraud_rate_pct": 0.1203
+    },
+    {
+      "hour": 10,
+      "n": 425729,
+      "fraud": 375,
+      "fraud_rate_pct": 0.0881
+    },
+    {
+      "hour": 11,
+      "n": 445992,
+      "fraud": 324,
+      "fraud_rate_pct": 0.0726
+    },
+    {
+      "hour": 12,
+      "n": 483418,
+      "fraud": 339,
+      "fraud_rate_pct": 0.0701
+    },
+    {
+      "hour": 13,
+      "n": 468474,
+      "fraud": 346,
+      "fraud_rate_pct": 0.0739
+    },
+    {
+      "hour": 14,
+      "n": 439653,
+      "fraud": 353,
+      "fraud_rate_pct": 0.0803
+    },
+    {
+      "hour": 15,
+      "n": 416686,
+      "fraud": 341,
+      "fraud_rate_pct": 0.0818
+    },
+    {
+      "hour": 16,
+      "n": 441612,
+      "fraud": 345,
+      "fraud_rate_pct": 0.0781
+    },
+    {
+      "hour": 17,
+      "n": 439941,
+      "fraud": 353,
+      "fraud_rate_pct": 0.0802
+    },
+    {
+      "hour": 18,
+      "n": 580509,
+      "fraud": 343,
+      "fraud_rate_pct": 0.0591
+    },
+    {
+      "hour": 19,
+      "n": 647814,
+      "fraud": 342,
+      "fraud_rate_pct": 0.0528
+    },
+    {
+      "hour": 20,
+      "n": 553728,
+      "fraud": 340,
+      "fraud_rate_pct": 0.0614
+    },
+    {
+      "hour": 21,
+      "n": 247806,
+      "fraud": 347,
+      "fraud_rate_pct": 0.14
+    },
+    {
+      "hour": 22,
+      "n": 194555,
+      "fraud": 351,
+      "fraud_rate_pct": 0.1804
+    },
+    {
+      "hour": 23,
+      "n": 141257,
+      "fraud": 323,
+      "fraud_rate_pct": 0.2287
+    }
+  ],
+  "balance_patterns": [
+    {
+      "isFraud": 0,
+      "n": 2762196,
+      "pct_orig_zero": 47.37,
+      "pct_dest_zero": 0.06,
+      "pct_orig_emptied": 0.0,
+      "pct_err_orig": 90.58,
+      "pct_err_dest": 22.58
+    },
+    {
+      "isFraud": 1,
+      "n": 8213,
+      "pct_orig_zero": 0.5,
+      "pct_dest_zero": 49.63,
+      "pct_orig_emptied": 97.63,
+      "pct_err_orig": 0.55,
+      "pct_err_dest": 56.5
+    }
+  ],
+  "flagged": [
+    {
+      "isFraud": 0,
+      "isFlaggedFraud": 0,
+      "n": 6354407
+    },
+    {
+      "isFraud": 1,
+      "isFlaggedFraud": 0,
+      "n": 8197
+    },
+    {
+      "isFraud": 1,
+      "isFlaggedFraud": 1,
+      "n": 16
+    }
+  ],
+  "unique_accounts": [
+    {
+      "orig": 6353307,
+      "dest": 2722362
+    }
+  ],
+  "n_steps": [
+    {
+      "min_step": 1,
+      "max_step": 743
+    }
+  ],
+  "describe": {
+    "count": {
+      "step": "6362620",
+      "amount": "6362620",
+      "oldbalanceOrg": "6362620",
+      "newbalanceOrig": "6362620",
+      "oldbalanceDest": "6362620",
+      "newbalanceDest": "6362620"
+    },
+    "mean": {
+      "step": "243.39724563151657",
+      "amount": "179861.90354913124",
+      "oldbalanceOrg": "833883.1040744885",
+      "newbalanceOrig": "855113.6685785864",
+      "oldbalanceDest": "1100701.6665196356",
+      "newbalanceDest": "1224996.3982019145"
+    },
+    "stddev": {
+      "step": "142.33197104913012",
+      "amount": "603858.2314629337",
+      "oldbalanceOrg": "2888242.673037555",
+      "newbalanceOrig": "2924048.5029542577",
+      "oldbalanceDest": "3399180.11299447",
+      "newbalanceDest": "3674128.9421196356"
+    },
+    "min": {
+      "step": "1",
+      "amount": "0.0",
+      "oldbalanceOrg": "0.0",
+      "newbalanceOrig": "0.0",
+      "oldbalanceDest": "0.0",
+      "newbalanceDest": "0.0"
+    },
+    "max": {
+      "step": "743",
+      "amount": "9.244551664E7",
+      "oldbalanceOrg": "5.958504037E7",
+      "newbalanceOrig": "4.958504037E7",
+      "oldbalanceDest": "3.5601588935E8",
+      "newbalanceDest": "3.5617927892E8"
+    }
+  },
+  "relevant_rows": 2770409,
+  "corr_with_label": {
+    "amount": 0.3319004377500699,
+    "oldbalanceOrg": 0.3689414624107358,
+    "newbalanceOrig": 0.07874857815587398,
+    "oldbalanceDest": -0.11843146318252404,
+    "newbalanceDest": -0.07094556170357183,
+    "errorBalanceOrig": -0.14861531278746765,
+    "errorBalanceDest": 0.31742786361519376,
+    "origEmptied": 0.9846025368768472,
+    "destZeroBalance": 0.6552890589424185
+  }
+}

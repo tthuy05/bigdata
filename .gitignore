@@ -12,7 +12,9 @@ __pycache__/
 # Large Datasets & Parquet (Tránh vượt giới hạn 100MB của GitHub)
 data/PS_*.csv
 data/*.parquet/
-*.parquet
+data/**/*.parquet
+!models/**/*.parquet
+!outputs/**/*.parquet
 
 # Runtime cục bộ & Hadoop & CRC
 .runtime/

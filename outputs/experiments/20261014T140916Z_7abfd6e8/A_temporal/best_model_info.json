@@ -1,0 +1,73 @@
+{
+  "name": "Decision Tree",
+  "threshold": 1.0,
+  "metrics": {
+    "TP": 413,
+    "TN": 55065,
+    "FP": 0,
+    "FN": 4,
+    "precision": 1.0,
+    "recall": 0.9904076738609112,
+    "f1": 0.9951807228915662,
+    "accuracy": 0.9999279045456184,
+    "specificity": 1.0,
+    "auc_roc": 0.995200440029344,
+    "auc_pr": 0.9948260564281945,
+    "at_default_0_5": {
+      "TP": 413,
+      "FP": 39,
+      "FN": 4,
+      "precision": 0.9137168141592921,
+      "recall": 0.9904076738609112,
+      "f1": 0.950517836593786
+    },
+    "threshold": 1.0,
+    "train_time_s": 3.7,
+    "predict_time_s": 0.587,
+    "validation": {
+      "TP": 27,
+      "TN": 27843,
+      "FP": 0,
+      "FN": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "accuracy": 1.0,
+      "specificity": 1.0,
+      "auc_roc": 1.0,
+      "auc_pr": 1.0
+    },
+    "evaluation_scope": "test",
+    "score_column": "probability[1]",
+    "auc_method": "Spark BinaryClassificationEvaluator numBins=0",
+    "timing_scope": "fit only; transform+cache materialization only; excludes metrics",
+    "selected_before_test": true
+  },
+  "feature_profile": "post_transaction",
+  "features": [
+    "type_CASH_OUT",
+    "log_amount",
+    "log_oldbalanceOrg",
+    "log_newbalanceOrig",
+    "log_oldbalanceDest",
+    "log_newbalanceDest",
+    "slog_errorBalanceOrig",
+    "slog_errorBalanceDest",
+    "origZeroBalance",
+    "destZeroBalance",
+    "origEmptied",
+    "hour"
+  ],
+  "run_id": "20261014T140916Z_7abfd6e8",
+  "experiment": "A_temporal",
+  "model_path": "outputs\\experiments\\20261014T140916Z_7abfd6e8\\A_temporal\\models\\decision_tree",
+  "selection": {
+    "dataset": "validation",
+    "criteria": [
+      "auc_pr",
+      "f1",
+      "precision"
+    ]
+  },
+  "status": "VERIFIED"
+}

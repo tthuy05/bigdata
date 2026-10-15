@@ -31,7 +31,7 @@
     "1": 16
   },
   "raw_fraud_rate": 0.001290820448180152,
-  "time_s": 131.574,
+  "time_s": 52.229,
   "removal_groups": [
     {
       "reason": "missing_values",

@@ -1,0 +1,64 @@
+{
+  "name": "GBT",
+  "threshold": 0.9700663880399852,
+  "metrics": {
+    "TP": 43,
+    "TN": 54984,
+    "FP": 28,
+    "FN": 117,
+    "precision": 0.6056338028169014,
+    "recall": 0.26875,
+    "f1": 0.3722943722943723,
+    "accuracy": 0.9973718552889147,
+    "specificity": 0.9994910201410602,
+    "auc_roc": 0.8347780370646405,
+    "auc_pr": 0.28640232537778015,
+    "at_default_0_5": {
+      "TP": 107,
+      "FP": 6448,
+      "FN": 53,
+      "precision": 0.016323417238749048,
+      "recall": 0.66875,
+      "f1": 0.03186895011169025
+    },
+    "threshold": 0.9700663880399852,
+    "train_time_s": 387.3,
+    "predict_time_s": 1.904,
+    "validation": {
+      "TP": 26,
+      "TN": 27403,
+      "FP": 19,
+      "FN": 63,
+      "precision": 0.5777777777777777,
+      "recall": 0.29213483146067415,
+      "f1": 0.38805970149253727,
+      "accuracy": 0.9970193740685543,
+      "specificity": 0.999307125665524,
+      "auc_roc": 0.8380194201489987,
+      "auc_pr": 0.2826208116393428
+    },
+    "evaluation_scope": "test",
+    "score_column": "probability[1]",
+    "auc_method": "Spark BinaryClassificationEvaluator numBins=0",
+    "timing_scope": "fit only; transform+cache materialization only; excludes metrics",
+    "selected_before_test": true
+  },
+  "feature_profile": "pre_transaction",
+  "features": [
+    "type_CASH_OUT",
+    "log_amount",
+    "hour"
+  ],
+  "run_id": "20261014T140916Z_7abfd6e8",
+  "experiment": "B_stratified",
+  "model_path": "outputs\\experiments\\20261014T140916Z_7abfd6e8\\B_stratified\\models\\gbt",
+  "selection": {
+    "dataset": "validation",
+    "criteria": [
+      "auc_pr",
+      "f1",
+      "precision"
+    ]
+  },
+  "status": "VERIFIED"
+}

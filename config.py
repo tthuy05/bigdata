@@ -19,9 +19,9 @@ BEST_MODEL_PATH = os.path.join(MODEL_DIR, "best_model")
 
 # Spark
 APP_NAME = "FraudDetection-PaySim"
-SPARK_MASTER = os.environ.get("SPARK_MASTER", "local[2]")
-DRIVER_MEMORY = os.environ.get("SPARK_DRIVER_MEMORY", "2g")
-SHUFFLE_PARTITIONS = int(os.environ.get("SPARK_SHUFFLE_PARTITIONS", "8"))
+SPARK_MASTER = os.environ.get("SPARK_MASTER", "local[*]")
+DRIVER_MEMORY = os.environ.get("SPARK_DRIVER_MEMORY", "4g")
+SHUFFLE_PARTITIONS = int(os.environ.get("SPARK_SHUFFLE_PARTITIONS", "16"))
 
 # Học máy
 SEED = 42

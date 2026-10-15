@@ -25,6 +25,13 @@ PAYSIM_SCHEMA = StructType([
 
 
 def get_spark(app_name: str = config.APP_NAME) -> SparkSession:
+    # Ưu tiên JDK tương thích (JDK 17, 11, 8) nếu môi trường có cài đặt
+    for candidate in [r"C:\Program Files\Java\jdk-17", r"C:\Program Files\Java\jdk-11", r"C:\Program Files\Java\jre1.8.0_351"]:
+        if os.path.isdir(candidate):
+            os.environ["JAVA_HOME"] = candidate
+            os.environ["PATH"] = os.path.join(candidate, "bin") + os.pathsep + os.environ.get("PATH", "")
+            break
+
     # Pin workers to this interpreter, avoiding Windows' Microsoft Store alias.
     os.environ["PYSPARK_PYTHON"] = sys.executable
     os.environ["PYSPARK_DRIVER_PYTHON"] = sys.executable
